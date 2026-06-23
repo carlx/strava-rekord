@@ -17,8 +17,9 @@ to, co już poszło.
 
 ```bash
 npm install
-npx playwright install chromium   # potrzebne raz, ~100 MB
-node src/login.js                 # otwiera Chrome, logujesz się ręcznie
+cp config.example.json config.json  # potem uzupełnij formUrl, displayName, daty
+npx playwright install chromium     # potrzebne raz, ~100 MB
+node src/login.js                   # otwiera Chrome, logujesz się ręcznie
 ```
 
 `login.js` otworzy okno Chrome na adresie formularza. Zaloguj się normalnie
