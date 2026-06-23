@@ -32,6 +32,27 @@ Jeśli zobaczysz "Couldn't sign you in — This browser or app may not be secure
 to znaczy że Playwright spadł z powrotem na bundlowanego Chromium. Sprawdź,
 czy masz Google Chrome zainstalowane w `/Applications/Google Chrome.app` (macOS).
 
+## Eksport danych ze Stravy
+
+Skrypt potrzebuje pliku `activities.csv` z **zbiorczego eksportu konta** Stravy
+(tzw. *Bulk Export* — to ten sam plik niezależnie od tego, ile masz aktywności):
+
+1. Zaloguj się na [strava.com](https://www.strava.com) (eksport jest dostępny
+   tylko w wersji webowej, nie w aplikacji mobilnej).
+2. Wejdź w **Ustawienia** → **Moje konto** →
+   [„Pobierz lub usuń swoje konto"](https://www.strava.com/athlete/delete_your_account).
+3. W sekcji **„Pobierz prośbę (opcjonalnie)"** kliknij **„Poproś o swoje archiwum"**.
+4. Strava przygotuje archiwum i wyśle **e-mail z linkiem do pobrania** (zwykle od
+   kilku minut do kilku godzin).
+5. Pobierz i rozpakuj ZIP. W środku znajdziesz m.in. plik **`activities.csv`**
+   (lista wszystkich aktywności).
+6. Skopiuj ten `activities.csv` do katalogu projektu, obok `config.json`.
+
+> Uwaga: archiwum zawiera całą historię konta. Plik `activities.csv` jest w
+> `.gitignore`, więc Twoje dane nie trafią do repo.
+
+Aktualizacja danych później → patrz [Re-export ze Stravy](#re-export-ze-stravy).
+
 ## Codzienny workflow
 
 ```bash
