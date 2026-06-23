@@ -1,0 +1,15 @@
+{
+  "formUrl": "https://docs.google.com/forms/d/e/XXXXXXXXXXXXXXXXXXXX/viewform",
+  "displayName": "Imię Nazwisko",
+  "dateFrom": "2026-06-22",
+  "dateTo": "2026-09-21",
+  "timeSource": "moving",
+  "skipTypes": ["Swim"],
+  "typeMapping": {
+    "Ride": "Jazda na rowerze",
+    "Walk": "Spacery/wędrówki górskie",
+    "Hike": "Spacery/wędrówki górskie",
+    "Run": "Bieganie",
+    "TrailRun": "Bieganie"
+  }
+}
