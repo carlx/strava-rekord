@@ -71,7 +71,7 @@ Sensowne flagi `submit.js`:
 ```json
 {
   "formUrl": "...",
-  "displayName": "Karol Wawrzecki",
+  "displayName": "Jan Kowalski",
   "dateFrom": "2026-06-22",
   "dateTo": "2026-09-21",
   "timeSource": "moving",
@@ -164,12 +164,32 @@ sprawdź czy labelki w `form-fields.json` zgadzają się z `LABELS` w
 Submitter sczyta dotychczas wysłane z `db.json`, więc po `node src/login.js`
 i ponownym `node src/submit.js --submit` ruszy od tej, na której padło.
 
-## Pliki w repo
+## Struktura plików
 
-- `activities.csv` — źródło, eksport ze Stravy
-- `config.json` — Twoja konfiguracja
-- `db.json` — stan (generowany przez `import.js`, modyfikowany przez `submit.js`)
-- `form-fields.json`, `form-raw.json` — dump struktury formularza (`inspectForm.js`)
-- `screenshots/` — dry-run preview formularza
-- `.chrome-profile/` — sesja Chrome (cookies, localStorage)
-- `src/login.js`, `src/import.js`, `src/inspectForm.js`, `src/formMapping.js`, `src/submit.js`, `src/list.js`
+```
+strava-rekord/
+├── src/
+│   ├── import.js         # CSV → db.json (idempotentny import)
+│   ├── submit.js         # wypełnia i wysyła formularz, ustawia flagi submitted
+│   ├── list.js           # podgląd wysłanych aktywności z zakresu
+│   ├── login.js          # jednorazowe logowanie do Google (zapis sesji)
+│   ├── inspectForm.js    # zrzut struktury formularza do form-*.json
+│   └── formMapping.js    # wczytanie config.json + mapowanie pól formularza
+├── config.example.json   # szablon konfiguracji (skopiuj do config.json)
+├── package.json
+├── package-lock.json
+└── README.md
+```
+
+Reszta plików powstaje lokalnie i jest ignorowana przez `.gitignore`
+(nie trafia do repo):
+
+| Plik / katalog | Co to | Tworzony przez |
+|---|---|---|
+| `config.json` | Twoja konfiguracja | ręcznie z `config.example.json` |
+| `activities.csv` | eksport aktywności ze Stravy | pobierasz ze Stravy |
+| `db.json` | stan: aktywności + flagi `submitted` | `import.js` / `submit.js` |
+| `form-raw.json`, `form-fields.json` | dump struktury formularza | `inspectForm.js` |
+| `screenshots/` | podgląd/audyt wypełnionego formularza | `submit.js` |
+| `.chrome-profile/` | zapisana sesja Chrome (cookies) | `login.js` |
+| `node_modules/` | zależności | `npm install` |
