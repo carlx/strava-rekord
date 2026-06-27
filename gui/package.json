@@ -1,0 +1,47 @@
+{
+  "name": "strava-rekord-gui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GUI (Electron) do wysyłki aktywności Strava do formularza Rekordowe kilometry",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux",
+    "dist:mac": "electron-builder --mac"
+  },
+  "dependencies": {
+    "csv-parse": "^5.5.6",
+    "dayjs": "^1.11.13",
+    "playwright-core": "^1.48.0"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.strava.rekord",
+    "productName": "Strava Rekord",
+    "files": [
+      "main.js",
+      "preload.js",
+      "lib/**/*",
+      "renderer/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/playwright-core/**/*"
+    ],
+    "win": {
+      "target": "portable"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.healthcare-fitness"
+    }
+  }
+}

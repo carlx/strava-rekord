@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline';" />
+    <title>Strava Rekord</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>🚴 Strava → Rekordowe kilometry</h1>
+      <div class="dir">
+        <span>Katalog aplikacji:</span>
+        <code id="appdir">…</code>
+        <button id="open-dir" class="link">Otwórz</button>
+      </div>
+    </header>
+
+    <section class="panel" id="status-panel">
+      <div class="status-grid" id="status-grid"><!-- wypełniane z JS --></div>
+      <button id="refresh" class="ghost">Odśwież status</button>
+    </section>
+
+    <section class="panel actions">
+      <div class="step">
+        <button id="btn-login">1 · Zaloguj do Google</button>
+        <p>Jednorazowo (otwiera Twój Chrome). Sesja zostaje zapamiętana.</p>
+      </div>
+      <div class="step">
+        <button id="btn-import">2 · Importuj activities.csv</button>
+        <p>Wczytuje eksport ze Stravy do bazy (idempotentne).</p>
+      </div>
+
+      <div class="step submit-step">
+        <div class="submit-row">
+          <label>Limit:
+            <input id="limit" type="number" min="1" placeholder="wszystkie" />
+          </label>
+          <label class="cb"><input id="headed" type="checkbox" /> Pokaż okno przeglądarki</label>
+          <label class="cb"><input id="screenshot" type="checkbox" /> Screenshot w dry-run</label>
+        </div>
+        <div class="submit-row">
+          <button id="btn-dry" class="secondary">Dry-run (nie wysyła)</button>
+          <button id="btn-live" class="danger">3 · Wyślij (LIVE)</button>
+          <button id="btn-cancel" class="ghost" disabled>Stop</button>
+        </div>
+      </div>
+
+      <div class="step">
+        <button id="btn-list" class="secondary">Pokaż listę (z zakresu)</button>
+      </div>
+    </section>
+
+    <section class="panel" id="list-panel" hidden>
+      <div id="list-content"></div>
+    </section>
+
+    <section class="panel log-panel">
+      <div class="log-head">
+        <span>Log</span>
+        <button id="clear-log" class="link">Wyczyść</button>
+      </div>
+      <pre id="log"></pre>
+    </section>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>
