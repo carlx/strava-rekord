@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('api', {
   runSubmit: (opts) => ipcRenderer.send('submit', opts),
   cancel: () => ipcRenderer.send('cancel'),
   openDir: () => ipcRenderer.send('open-dir'),
+  clearSession: () => ipcRenderer.invoke('logout'),
   // strumienie zdarzeń
   onLog: (cb) => ipcRenderer.on('log', (_e, line) => cb(line)),
   onBusy: (cb) => ipcRenderer.on('busy', (_e, b) => cb(b)),

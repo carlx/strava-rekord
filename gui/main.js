@@ -131,6 +131,15 @@ ipcMain.on('open-dir', () => {
   shell.openPath(paths.base());
 });
 
+// Usunięcie zapisanej sesji Chrome (profil trwały) — wymusza ponowne logowanie.
+ipcMain.handle('logout', async () => {
+  if (busy) throw new Error('Inne zadanie trwa — poczekaj na zakończenie.');
+  const { paths } = require('./lib/paths');
+  fs.rmSync(paths.profile(), { recursive: true, force: true });
+  log('🗑 Usunięto zapisaną sesję Chrome. Kliknij „Zaloguj do Google”, aby zalogować się ponownie.');
+  return true;
+});
+
 app.whenReady().then(() => {
   createWindow();
   app.on('activate', () => {

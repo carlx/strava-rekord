@@ -48,7 +48,7 @@ function logOnce(msg) {
 }
 
 function setBusy(b) {
-  for (const id of ['btn-login', 'btn-import', 'btn-dry', 'btn-live', 'btn-list', 'refresh']) {
+  for (const id of ['btn-login', 'btn-logout', 'btn-import', 'btn-dry', 'btn-live', 'btn-list', 'refresh']) {
     $(id).disabled = b;
   }
   $('btn-cancel').disabled = !b;
@@ -86,6 +86,11 @@ function submitOpts(live) {
 
 // --- wiring ---
 $('btn-login').onclick = () => window.api.runLogin();
+$('btn-logout').onclick = async () => {
+  if (!confirm('Usunąć zapisaną sesję Chrome? Trzeba będzie zalogować się ponownie.')) return;
+  try { await window.api.clearSession(); refreshStatus(); }
+  catch (e) { logLine('❌ ' + e.message); }
+};
 $('btn-import').onclick = () => window.api.runImport();
 $('btn-dry').onclick = () => window.api.runSubmit(submitOpts(false));
 $('btn-live').onclick = () => {
