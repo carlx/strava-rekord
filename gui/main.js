@@ -155,22 +155,56 @@ function assertInsideShots(filePath) {
   return resolved;
 }
 
+// Zwraca wiersze per aktywność (pogrupowane zrzuty + dane z bazy i payload).
 ipcMain.handle('list-shots', async (_e, mode) => {
   const dir = shotsDir(mode);
   let names = [];
   try {
     names = fs.readdirSync(dir).filter((n) => n.toLowerCase().endsWith('.png'));
   } catch { names = []; }
-  names.sort();
-  return names.map((name) => {
+
+  const byId = new Map();
+  for (const name of names) {
     const m = name.match(/^(.*)-(filled|confirm)\.png$/i);
-    return {
-      name,
-      path: path.join(dir, name),
-      id: m ? m[1] : name,
-      kind: m ? m[2].toLowerCase() : '',
-    };
-  });
+    const id = m ? m[1] : name.replace(/\.png$/i, '');
+    const kind = m ? m[2].toLowerCase() : 'inny';
+    if (!byId.has(id)) byId.set(id, []);
+    byId.get(id).push({ kind, name, path: path.join(dir, name) });
+  }
+
+  const { readDb } = require('./lib/db');
+  const dbById = new Map(readDb().activities.map((a) => [String(a.id), a]));
+
+  let config = null, configError = null;
+  try { config = require('./lib/config').loadConfig(); }
+  catch (e) { configError = e.message; }
+  const { buildPayload } = require('./lib/mapping');
+
+  const kindRank = { filled: 0, confirm: 1 };
+  const rows = [];
+  for (const [id, shots] of byId) {
+    shots.sort((a, b) => (kindRank[a.kind] ?? 9) - (kindRank[b.kind] ?? 9));
+    const a = dbById.get(String(id));
+    let payload = null;
+    if (a && config) { try { payload = buildPayload(a, config); } catch { /* pomiń */ } }
+    rows.push({
+      id,
+      inDb: !!a,
+      date: a?.date ? a.date.slice(0, 10) : null,
+      type: a?.type ?? null,
+      name: a?.name ?? null,
+      submitted: !!a?.submitted,
+      submittedAt: a?.submittedAt ?? null,
+      submitError: a?.submitError ?? null,
+      payload,
+      configError: payload ? null : configError,
+      shots,
+    });
+  }
+  rows.sort((x, y) =>
+    (x.date || '').localeCompare(y.date || '') || String(x.id).localeCompare(String(y.id))
+  );
+  return rows;
 });
 
 ipcMain.handle('read-shot', async (_e, filePath) => {
@@ -181,32 +215,6 @@ ipcMain.handle('read-shot', async (_e, filePath) => {
 
 ipcMain.on('open-shot', (_e, filePath) => {
   try { shell.openPath(assertInsideShots(filePath)); } catch { /* ignore */ }
-});
-
-// Dane wprowadzone do formularza dla danej aktywności (do porównania ze zrzutem).
-ipcMain.handle('activity-info', async (_e, id) => {
-  const { readDb } = require('./lib/db');
-  const db = readDb();
-  const a = db.activities.find((x) => String(x.id) === String(id));
-  if (!a) return null;
-
-  const info = {
-    id: a.id,
-    name: a.name,
-    submitted: !!a.submitted,
-    submittedAt: a.submittedAt || null,
-    submitError: a.submitError || null,
-    payload: null,
-    configError: null,
-  };
-  try {
-    const { loadConfig } = require('./lib/config');
-    const { buildPayload } = require('./lib/mapping');
-    info.payload = buildPayload(a, loadConfig());
-  } catch (e) {
-    info.configError = e.message;
-  }
-  return info;
 });
 
 // Usunięcie zapisanej sesji Chrome (profil trwały) — wymusza ponowne logowanie.

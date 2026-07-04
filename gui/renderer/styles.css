@@ -92,17 +92,23 @@ pre#log {
 .shots-controls { display: flex; gap: 6px; align-items: center; }
 button.toggle { background: transparent; color: var(--muted); border: 1px solid var(--border); font-weight: 500; padding: 5px 12px; font-size: 12px; }
 button.toggle.active { background: var(--orange); color: #fff; border-color: var(--orange); }
-.shots-body { display: grid; grid-template-columns: 220px 1fr; gap: 12px; }
-#shots-list { list-style: none; margin: 0; padding: 0; max-height: 320px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
-#shots-list li { padding: 6px 10px; font-size: 12px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 6px; }
+.shots-body { display: block; }
+#shots-list { list-style: none; margin: 0 0 12px; padding: 0; max-height: 220px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+#shots-list li { padding: 7px 10px; font-size: 12px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+#shots-list li:last-child { border-bottom: none; }
 #shots-list li:hover { background: #8881; }
 #shots-list li.active { background: var(--orange); color: #fff; }
-#shots-list li .kind { opacity: 0.7; }
-#shots-list li.active .kind { opacity: 0.9; }
+#shots-list li .row-main { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#shots-list li .row-badges { display: flex; gap: 4px; flex: none; }
+#shots-list .badge { font-size: 10px; text-transform: uppercase; letter-spacing: .03em; background: #8882; padding: 1px 6px; border-radius: 999px; }
+#shots-list li.active .badge { background: #ffffff44; }
 #shots-list .empty { color: var(--muted); cursor: default; justify-content: flex-start; }
-#shots-preview { border: 1px solid var(--border); border-radius: 8px; padding: 8px; min-height: 200px; max-height: 460px; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+
+#shots-preview { border: 1px solid var(--border); border-radius: 8px; padding: 10px; min-height: 160px; display: flex; flex-direction: column; gap: 12px; }
+.shot-block { display: flex; flex-direction: column; gap: 5px; }
+.shot-block-head { font-size: 12px; color: var(--muted); }
 #shots-preview img { max-width: 100%; border: 1px solid var(--border); border-radius: 4px; }
-#shots-preview .open-native { align-self: flex-start; }
+.shot-info-ctx { font-size: 12px; margin-top: 4px; }
 .shot-info { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; background: #8881; }
 .shot-info-head { font-size: 12px; margin-bottom: 6px; color: var(--muted); }
 .shot-info-head code { background: #8882; padding: 1px 5px; border-radius: 4px; }

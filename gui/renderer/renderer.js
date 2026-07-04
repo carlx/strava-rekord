@@ -88,36 +88,67 @@ function submitOpts(live) {
   };
 }
 
-// --- podgląd screenshotów ---
+// --- podgląd screenshotów (wiersze per aktywność) ---
 let shotsMode = 'dry-run';
+
+const KIND_LABEL = { filled: 'Wypełniony formularz', confirm: 'Potwierdzenie wysyłki' };
+
+function rowTooltip(row) {
+  const lines = [row.name || `(id ${row.id})`, `${row.date ?? '??'} · ${row.type ?? '?'}`];
+  if (row.payload) lines.push(`${row.payload.duration} · ${row.payload.distance} km`, row.payload.link);
+  return lines.join('\n');
+}
 
 async function loadShots() {
   const list = $('shots-list');
-  const files = await window.api.listShots(shotsMode);
-  if (!files.length) {
+  const rows = await window.api.listShots(shotsMode);
+  if (!rows.length) {
     list.innerHTML = '<li class="empty">(brak — uruchom dry-run ze screenshotem lub wysyłkę live)</li>';
-    $('shots-preview').innerHTML = '<p class="muted">Wybierz screenshot z listy…</p>';
+    $('shots-preview').innerHTML = '<p class="muted">Wybierz aktywność z listy…</p>';
     return;
   }
-  list.innerHTML = files
-    .map(
-      (f, i) =>
-        `<li data-i="${i}" title="${f.name}"><span>${f.id}</span><span class="kind">${f.kind}</span></li>`
-    )
+  list.innerHTML = rows
+    .map((r, i) => {
+      const badges = r.shots.map((s) => `<span class="badge">${s.kind}</span>`).join('');
+      const mark = r.submitted ? '<span class="ok">✔</span> ' : '';
+      const title = r.name ? esc(r.name) : `<span class="muted">id ${esc(r.id)}</span>`;
+      return `<li data-i="${i}"><span class="row-main">${mark}<b>${esc(r.date ?? '??')}</b> · ${esc(r.type ?? '?')} · ${title}</span><span class="row-badges">${badges}</span></li>`;
+    })
     .join('');
   [...list.querySelectorAll('li[data-i]')].forEach((li) => {
-    const file = files[Number(li.dataset.i)];
-    li.onclick = () => showShot(file, li);
-    li.onmouseenter = async () => {
-      if (li.dataset.tip) return;
-      li.dataset.tip = '1';
-      const info = await window.api.activityInfo(file.id).catch(() => null);
-      if (info && info.payload) {
-        const p = info.payload;
-        li.title = `${p.name}\n${p.date} · ${p.activityType}\n${p.duration} · ${p.distance} km\n${p.link}`;
-      }
-    };
+    const row = rows[Number(li.dataset.i)];
+    li.title = rowTooltip(row);
+    li.onclick = () => showActivity(row, li);
   });
+}
+
+function showActivity(row, li) {
+  document.querySelectorAll('#shots-list li').forEach((el) => el.classList.remove('active'));
+  li.classList.add('active');
+  const preview = $('shots-preview');
+  preview.innerHTML = infoCardHtml(row);
+
+  for (const shot of row.shots) {
+    const block = document.createElement('div');
+    block.className = 'shot-block';
+
+    const head = document.createElement('div');
+    head.className = 'shot-block-head';
+    head.textContent = (KIND_LABEL[shot.kind] || shot.kind) + ' · ';
+    const open = document.createElement('button');
+    open.className = 'link';
+    open.textContent = 'otwórz w systemie';
+    open.onclick = () => window.api.openShot(shot.path);
+    head.appendChild(open);
+
+    const img = document.createElement('img');
+    img.alt = shot.name;
+    window.api.readShot(shot.path).then((url) => { img.src = url; }).catch(() => { img.alt = 'błąd wczytania zrzutu'; });
+
+    block.appendChild(head);
+    block.appendChild(img);
+    preview.appendChild(block);
+  }
 }
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -139,40 +170,18 @@ function infoCardHtml(info) {
   if (info.submitError) head += ` · <span class="warn">błąd: ${esc(info.submitError)}</span>`;
   head += '</div>';
 
+  const ctx = (info.date || info.type || info.name)
+    ? `<div class="shot-info-ctx">${esc(info.date ?? '??')} · ${esc(info.type ?? '?')}${info.name ? ' · ' + esc(info.name) : ''}</div>`
+    : '';
+
   if (!info.payload) {
-    return `<div class="shot-info">${head}<p class="warn">Nie można zbudować danych: ${esc(info.configError || 'brak configu')}</p></div>`;
+    return `<div class="shot-info">${head}${ctx}<p class="warn">Nie można zbudować danych: ${esc(info.configError || 'brak configu')}</p></div>`;
   }
   const rows = FIELD_LABELS.map(([k, label]) => {
     const v = info.payload[k];
     return `<tr><th>${label}</th><td>${v ? esc(v) : '<span class="muted">—</span>'}</td></tr>`;
   }).join('');
-  return `<div class="shot-info">${head}<table>${rows}</table></div>`;
-}
-
-async function showShot(file, li) {
-  document.querySelectorAll('#shots-list li').forEach((el) => el.classList.remove('active'));
-  li.classList.add('active');
-  const preview = $('shots-preview');
-  preview.innerHTML = '<p class="muted">Ładowanie…</p>';
-  try {
-    const [dataUrl, info] = await Promise.all([
-      window.api.readShot(file.path),
-      window.api.activityInfo(file.id).catch(() => null),
-    ]);
-    preview.innerHTML = infoCardHtml(info);
-
-    const btn = document.createElement('button');
-    btn.className = 'ghost open-native';
-    btn.textContent = 'Otwórz w podglądzie systemowym';
-    btn.onclick = () => window.api.openShot(file.path);
-    const img = document.createElement('img');
-    img.src = dataUrl;
-    img.alt = file.name;
-    preview.appendChild(btn);
-    preview.appendChild(img);
-  } catch (e) {
-    preview.innerHTML = `<p class="warn">Nie udało się wczytać: ${e.message}</p>`;
-  }
+  return `<div class="shot-info">${head}${ctx}<table>${rows}</table></div>`;
 }
 
 function setShotsMode(mode) {
