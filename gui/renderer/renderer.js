@@ -37,6 +37,10 @@ async function refreshStatus() {
   if (s.displayName) cells.push(statItem('Podpis', s.displayName));
 
   $('status-grid').innerHTML = cells.join('');
+  if (s.range) {
+    $('date-from').value = s.range.from || '';
+    $('date-to').value = s.range.to || '';
+  }
   if (s.configError) logOnce('config: ' + s.configError);
 }
 
@@ -48,7 +52,7 @@ function logOnce(msg) {
 }
 
 function setBusy(b) {
-  for (const id of ['btn-login', 'btn-logout', 'btn-import', 'btn-dry', 'btn-live', 'btn-list', 'refresh']) {
+  for (const id of ['btn-login', 'btn-logout', 'btn-import', 'btn-dry', 'btn-live', 'btn-list', 'refresh', 'save-range']) {
     $(id).disabled = b;
   }
   $('btn-cancel').disabled = !b;
@@ -157,6 +161,16 @@ $('btn-live').onclick = () => {
 $('btn-cancel').onclick = () => window.api.cancel();
 $('btn-list').onclick = () => renderList().catch((e) => logLine('❌ ' + e.message));
 $('refresh').onclick = () => refreshStatus();
+$('save-range').onclick = async () => {
+  const dateFrom = $('date-from').value;
+  const dateTo = $('date-to').value;
+  if (!dateFrom || !dateTo) { logLine('⚠ Podaj obie daty.'); return; }
+  try {
+    await window.api.saveRange({ dateFrom, dateTo });
+    await refreshStatus();
+    if (!$('list-panel').hidden) renderList().catch(() => {});
+  } catch (e) { logLine('❌ ' + e.message); }
+};
 $('open-dir').onclick = () => window.api.openDir();
 $('clear-log').onclick = () => { logEl.textContent = ''; };
 

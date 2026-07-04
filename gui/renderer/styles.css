@@ -71,6 +71,11 @@ pre#log {
 .warn { color: var(--bad); font-size: 13px; }
 .muted { color: var(--muted); font-size: 13px; }
 
+.range-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.range-title { font-weight: 600; }
+.range-row label { font-size: 13px; display: flex; gap: 5px; align-items: center; }
+.range-row input[type="date"] { padding: 5px 7px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); color: inherit; }
+
 .shots-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--muted); }
 .shots-controls { display: flex; gap: 6px; align-items: center; }
 button.toggle { background: transparent; color: var(--muted); border: 1px solid var(--border); font-weight: 500; padding: 5px 12px; font-size: 12px; }

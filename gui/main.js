@@ -66,6 +66,14 @@ ipcMain.handle('status', async () => {
   return out;
 });
 
+// --- zapis zakresu dat do config.json ---
+ipcMain.handle('save-range', async (_e, range) => {
+  const { updateDateRange } = require('./lib/config');
+  const r = updateDateRange(range);
+  log(`📅 Zakres dat zapisany: ${r.from} → ${r.to}`);
+  return r;
+});
+
 // --- lista (lekka) ---
 ipcMain.handle('list', async () => {
   const { listActivities } = require('./lib/listActivities');
