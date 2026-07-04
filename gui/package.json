@@ -22,7 +22,7 @@
   },
   "build": {
     "appId": "com.strava.rekord",
-    "productName": "Strava Rekord",
+    "productName": "StravaImporter",
     "files": [
       "main.js",
       "preload.js",
