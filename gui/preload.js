@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('api', {
   runSubmit: (opts) => ipcRenderer.send('submit', opts),
   cancel: () => ipcRenderer.send('cancel'),
   openDir: () => ipcRenderer.send('open-dir'),
+  chooseCsv: () => ipcRenderer.invoke('choose-csv'),
   clearSession: () => ipcRenderer.invoke('logout'),
   listShots: (mode) => ipcRenderer.invoke('list-shots', mode),
   readShot: (filePath) => ipcRenderer.invoke('read-shot', filePath),

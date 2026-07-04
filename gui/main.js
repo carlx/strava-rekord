@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 
@@ -141,6 +141,21 @@ ipcMain.on('cancel', () => {
 ipcMain.on('open-dir', () => {
   const { paths } = require('./lib/paths');
   shell.openPath(paths.base());
+});
+
+// Wybór pliku CSV przez natywny dialog — kopiuje go do katalogu aplikacji
+// (paths.csv()), tak by dalszy import działał jak dziś.
+ipcMain.handle('choose-csv', async () => {
+  const { paths } = require('./lib/paths');
+  const result = await dialog.showOpenDialog(mainWin, {
+    title: 'Wybierz eksport CSV ze Stravy',
+    filters: [{ name: 'CSV', extensions: ['csv'] }],
+    properties: ['openFile'],
+  });
+  if (result.canceled || !result.filePaths[0]) return null;
+  fs.copyFileSync(result.filePaths[0], paths.csv());
+  log(`📄 Skopiowano plik CSV: ${result.filePaths[0]}`);
+  return { path: paths.csv() };
 });
 
 // --- podgląd screenshotów (dry-run / live) ---
