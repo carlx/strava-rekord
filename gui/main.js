@@ -183,6 +183,32 @@ ipcMain.on('open-shot', (_e, filePath) => {
   try { shell.openPath(assertInsideShots(filePath)); } catch { /* ignore */ }
 });
 
+// Dane wprowadzone do formularza dla danej aktywności (do porównania ze zrzutem).
+ipcMain.handle('activity-info', async (_e, id) => {
+  const { readDb } = require('./lib/db');
+  const db = readDb();
+  const a = db.activities.find((x) => String(x.id) === String(id));
+  if (!a) return null;
+
+  const info = {
+    id: a.id,
+    name: a.name,
+    submitted: !!a.submitted,
+    submittedAt: a.submittedAt || null,
+    submitError: a.submitError || null,
+    payload: null,
+    configError: null,
+  };
+  try {
+    const { loadConfig } = require('./lib/config');
+    const { buildPayload } = require('./lib/mapping');
+    info.payload = buildPayload(a, loadConfig());
+  } catch (e) {
+    info.configError = e.message;
+  }
+  return info;
+});
+
 // Usunięcie zapisanej sesji Chrome (profil trwały) — wymusza ponowne logowanie.
 ipcMain.handle('logout', async () => {
   if (busy) throw new Error('Inne zadanie trwa — poczekaj na zakończenie.');

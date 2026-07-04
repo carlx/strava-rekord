@@ -106,8 +106,47 @@ async function loadShots() {
     )
     .join('');
   [...list.querySelectorAll('li[data-i]')].forEach((li) => {
-    li.onclick = () => showShot(files[Number(li.dataset.i)], li);
+    const file = files[Number(li.dataset.i)];
+    li.onclick = () => showShot(file, li);
+    li.onmouseenter = async () => {
+      if (li.dataset.tip) return;
+      li.dataset.tip = '1';
+      const info = await window.api.activityInfo(file.id).catch(() => null);
+      if (info && info.payload) {
+        const p = info.payload;
+        li.title = `${p.name}\n${p.date} · ${p.activityType}\n${p.duration} · ${p.distance} km\n${p.link}`;
+      }
+    };
   });
+}
+
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const FIELD_LABELS = [
+  ['name', 'Imię i nazwisko'],
+  ['date', 'Data aktywności'],
+  ['activityType', 'Rodzaj aktywności'],
+  ['duration', 'Czas trwania'],
+  ['distance', 'Ilość kilometrów'],
+  ['link', 'Link'],
+  ['description', 'Dodatkowy opis'],
+];
+
+function infoCardHtml(info) {
+  if (!info) return '<div class="shot-info warn">Brak tej aktywności w bazie (db.json).</div>';
+  let head = `<div class="shot-info-head">Wprowadzone dane · <code>${esc(info.id)}</code>`;
+  if (info.submitted) head += ` · <span class="ok">wysłano ${info.submittedAt ? esc(info.submittedAt.slice(0, 16).replace('T', ' ')) : ''}</span>`;
+  if (info.submitError) head += ` · <span class="warn">błąd: ${esc(info.submitError)}</span>`;
+  head += '</div>';
+
+  if (!info.payload) {
+    return `<div class="shot-info">${head}<p class="warn">Nie można zbudować danych: ${esc(info.configError || 'brak configu')}</p></div>`;
+  }
+  const rows = FIELD_LABELS.map(([k, label]) => {
+    const v = info.payload[k];
+    return `<tr><th>${label}</th><td>${v ? esc(v) : '<span class="muted">—</span>'}</td></tr>`;
+  }).join('');
+  return `<div class="shot-info">${head}<table>${rows}</table></div>`;
 }
 
 async function showShot(file, li) {
@@ -116,8 +155,12 @@ async function showShot(file, li) {
   const preview = $('shots-preview');
   preview.innerHTML = '<p class="muted">Ładowanie…</p>';
   try {
-    const dataUrl = await window.api.readShot(file.path);
-    preview.innerHTML = '';
+    const [dataUrl, info] = await Promise.all([
+      window.api.readShot(file.path),
+      window.api.activityInfo(file.id).catch(() => null),
+    ]);
+    preview.innerHTML = infoCardHtml(info);
+
     const btn = document.createElement('button');
     btn.className = 'ghost open-native';
     btn.textContent = 'Otwórz w podglądzie systemowym';

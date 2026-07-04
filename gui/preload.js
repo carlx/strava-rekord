@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('api', {
   listShots: (mode) => ipcRenderer.invoke('list-shots', mode),
   readShot: (filePath) => ipcRenderer.invoke('read-shot', filePath),
   openShot: (filePath) => ipcRenderer.send('open-shot', filePath),
+  activityInfo: (id) => ipcRenderer.invoke('activity-info', id),
   // strumienie zdarzeń
   onLog: (cb) => ipcRenderer.on('log', (_e, line) => cb(line)),
   onBusy: (cb) => ipcRenderer.on('busy', (_e, b) => cb(b)),
