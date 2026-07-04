@@ -2,7 +2,7 @@
 
 Graficzna nakładka na skrypty z `../src`. Robi to samo (import CSV → logowanie →
 dry-run → wysyłka → lista), tylko w okienku, i daje się spakować do
-samodzielnej binarki: **Windows `.exe`**, **Linux `AppImage`**, **macOS `.dmg`**.
+samodzielnej binarki: **Windows `.zip`**, **Linux `AppImage`**, **macOS `.dmg`**.
 
 ## Jak to działa pod spodem
 
@@ -54,7 +54,7 @@ npm start
 
 ```bash
 npm run dist          # dla bieżącego systemu
-npm run dist:win      # Windows  .exe (portable)
+npm run dist:win      # Windows  .zip (rozpakuj gdziekolwiek, uruchom .exe ze środka)
 npm run dist:linux    # Linux    AppImage
 npm run dist:mac      # macOS    .dmg
 ```

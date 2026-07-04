@@ -33,7 +33,7 @@
       "node_modules/playwright-core/**/*"
     ],
     "win": {
-      "target": "portable"
+      "target": "zip"
     },
     "linux": {
       "target": "AppImage",

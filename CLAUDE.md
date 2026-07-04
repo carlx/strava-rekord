@@ -40,7 +40,7 @@ npm run list                      # show in-range submitted/pending
 GUI (`gui/`):
 ```bash
 cd gui && npm install && npm start   # dev
-npm run dist:mac | dist:win | dist:linux   # electron-builder -> gui/dist/ (.dmg / portable .exe / AppImage)
+npm run dist:mac | dist:win | dist:linux   # electron-builder -> gui/dist/ (.dmg / .zip / AppImage)
 ```
 
 No test framework. Logic changes have been verified with throwaway scripts that mock
@@ -64,6 +64,13 @@ at a temp dir — see prior scratchpad tests for the pattern.
 - **`FB_PUBLIC_LOAD_DATA_`** (a global Google Forms injects) is the "form is really
   loaded / session valid" signal used everywhere to wait on. `inspectForm.js` parses it
   to derive `entry.*` field IDs into `form-fields.json`.
+- **Windows target is `zip`, not `portable`.** electron-builder's NSIS `portable` target
+  self-extracts to a new (or same, if `unpackDirName` were set) folder under
+  `%LOCALAPPDATA%\Temp` on every launch. Since `gui/lib/paths.js` resolves the "app
+  directory" as *next to the running executable*, a portable build would silently lose
+  `config.json`/`db.json`/`.chrome-profile/` (or put user data at risk of Temp cleanup)
+  between runs. `zip` requires the user to extract once to a permanent folder — the
+  `.exe` there is stable, matching how `.dmg`/AppImage already behave.
 
 ## Data flow & form mapping
 
