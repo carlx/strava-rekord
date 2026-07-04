@@ -24,17 +24,17 @@ async function refreshStatus() {
   const yn = (b) => (b ? ['tak', 'ok'] : ['nie', 'bad']);
   const cells = [];
   const [cfgTxt, cfgCls] = yn(s.hasConfig);
-  cells.push(statItem('config.json', s.configError ? 'błąd' : cfgTxt, s.configError ? 'bad' : cfgCls));
-  cells.push(statItem('activities.csv', ...wrap(yn(s.hasCsv))));
-  cells.push(statItem('Sesja Google', ...wrap(yn(s.hasProfile))));
+  cells.push(statItem('Ustawienia', s.configError ? 'błąd' : cfgTxt, s.configError ? 'bad' : cfgCls));
+  cells.push(statItem('Plik z aktywnościami', ...wrap(yn(s.hasCsv))));
+  cells.push(statItem('Zalogowanie do Google', ...wrap(yn(s.hasProfile))));
 
   if (s.counts) {
-    cells.push(statItem('W bazie', s.counts.total));
+    cells.push(statItem('Wczytane aktywności', s.counts.total));
     cells.push(statItem('Wysłane', s.counts.submitted));
     cells.push(statItem('Do wysłania', s.counts.eligible ?? '—', s.counts.eligible ? 'ok' : ''));
   }
   if (s.range) cells.push(statItem('Zakres dat', `${s.range.from} → ${s.range.to}`));
-  if (s.displayName) cells.push(statItem('Podpis', s.displayName));
+  if (s.displayName) cells.push(statItem('Imię i nazwisko', s.displayName));
 
   $('status-grid').innerHTML = cells.join('');
 
@@ -101,6 +101,7 @@ function submitOpts(live) {
 let shotsMode = 'dry-run';
 
 const KIND_LABEL = { filled: 'Wypełniony formularz', confirm: 'Potwierdzenie wysyłki' };
+const BADGE_LABEL = { filled: 'wypełniony', confirm: 'potwierdzony' };
 
 function rowTooltip(row) {
   const lines = [row.name || `(id ${row.id})`, `${row.date ?? '??'} · ${row.type ?? '?'}`];
@@ -112,13 +113,13 @@ async function loadShots() {
   const list = $('shots-list');
   const rows = await window.api.listShots(shotsMode);
   if (!rows.length) {
-    list.innerHTML = '<li class="empty">(brak — uruchom dry-run ze screenshotem lub wysyłkę live)</li>';
+    list.innerHTML = '<li class="empty">(brak — zrób najpierw Dry-run albo Wyślij (LIVE), appka zapisze zrzuty ekranu)</li>';
     $('shots-preview').innerHTML = '<p class="muted">Wybierz aktywność z listy…</p>';
     return;
   }
   list.innerHTML = rows
     .map((r, i) => {
-      const badges = r.shots.map((s) => `<span class="badge">${s.kind}</span>`).join('');
+      const badges = r.shots.map((s) => `<span class="badge">${BADGE_LABEL[s.kind] || s.kind}</span>`).join('');
       const mark = r.submitted ? '<span class="ok">✔</span> ' : '';
       const title = r.name ? esc(r.name) : `<span class="muted">id ${esc(r.id)}</span>`;
       return `<li data-i="${i}"><span class="row-main">${mark}<b>${esc(r.date ?? '??')}</b> · ${esc(r.type ?? '?')} · ${title}</span><span class="row-badges">${badges}</span></li>`;

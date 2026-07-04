@@ -10,7 +10,7 @@
     <header>
       <h1>🚴 Strava → Rekordowe kilometry</h1>
       <div class="dir">
-        <span>Katalog aplikacji:</span>
+        <span>Folder aplikacji:</span>
         <code id="appdir">…</code>
         <button id="open-dir" class="link">Otwórz</button>
       </div>
@@ -47,15 +47,17 @@
     <section class="panel actions">
       <div class="step">
         <button id="btn-login">1 · Zaloguj do Google</button>
-        <button id="btn-logout" class="ghost">Usuń sesję</button>
-        <p>Jednorazowo (otwiera Twój Chrome). Sesja zostaje zapamiętana.
-           „Usuń sesję” = wyloguj, by zalogować się ponownie (np. na inne konto).</p>
+        <button id="btn-logout" class="ghost">Wyloguj się</button>
+        <p>Wystarczy raz — otworzy się Twoja przeglądarka, zaloguj się tam do
+           Google. Appka to zapamięta. „Wyloguj się” przydaje się, gdy chcesz
+           użyć innego konta.</p>
       </div>
       <div class="step">
         <button id="btn-choose-csv">2 · Wgraj plik z aktywnościami</button>
         <button id="btn-import" class="link">wczytaj ponownie już wgrany plik</button>
-        <p>Wybierz plik CSV pobrany ze Stravy — zostanie skopiowany i od razu
-           wczytany do bazy. Można to powtarzać (nic się nie nadpisze błędnie).</p>
+        <p>Wybierz plik z eksportem aktywności, który pobrałeś ze Stravy —
+           appka sama go wczyta. Możesz to robić wielokrotnie, nic się nie
+           zepsuje.</p>
       </div>
 
       <div class="step submit-step">
@@ -70,10 +72,14 @@
           <button id="btn-live" class="danger">3 · Wyślij (LIVE)</button>
           <button id="btn-cancel" class="ghost" disabled>Stop</button>
         </div>
+        <p>„Dry-run” wypełnia formularz i zapisuje zrzut ekranu, ale nic nie
+           wysyła — możesz sprawdzić, czy dane się zgadzają. „Wyślij (LIVE)”
+           robi to samo i na końcu naprawdę klika „Prześlij” w formularzu —
+           tego nie da się cofnąć.</p>
       </div>
 
       <div class="step">
-        <button id="btn-list" class="secondary">Pokaż listę (z zakresu)</button>
+        <button id="btn-list" class="secondary">Pokaż listę aktywności</button>
       </div>
     </section>
 
@@ -83,7 +89,7 @@
 
     <section class="panel" id="shots-panel">
       <div class="shots-head">
-        <span>Podgląd screenshotów</span>
+        <span>Podgląd wypełnionych formularzy</span>
         <span class="shots-controls">
           <button id="shots-dry" class="toggle active">Dry-run</button>
           <button id="shots-live" class="toggle">Live</button>
@@ -101,7 +107,7 @@
     <aside class="col-log">
     <section class="panel log-panel">
       <div class="log-head">
-        <span>Log</span>
+        <span>Dziennik zdarzeń</span>
         <button id="clear-log" class="link">Wyczyść</button>
       </div>
       <pre id="log"></pre>
