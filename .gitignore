@@ -59,3 +59,6 @@ form-fields.json
 
 # Local tooling
 .claude/
+
+# electron-builder output
+gui/dist/

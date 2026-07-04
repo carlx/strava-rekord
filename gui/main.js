@@ -147,14 +147,20 @@ ipcMain.on('open-dir', () => {
 // (paths.csv()), tak by dalszy import działał jak dziś.
 ipcMain.handle('choose-csv', async () => {
   const { paths } = require('./lib/paths');
+  const { assertValidActivitiesCsv } = require('./lib/importCsv');
   const result = await dialog.showOpenDialog(mainWin, {
     title: 'Wybierz eksport CSV ze Stravy',
     filters: [{ name: 'CSV', extensions: ['csv'] }],
     properties: ['openFile'],
   });
   if (result.canceled || !result.filePaths[0]) return null;
-  fs.copyFileSync(result.filePaths[0], paths.csv());
-  log(`📄 Skopiowano plik CSV: ${result.filePaths[0]}`);
+  const src = result.filePaths[0];
+  if (!src.toLowerCase().endsWith('.csv')) {
+    throw new Error('Wybierz plik z rozszerzeniem .csv.');
+  }
+  assertValidActivitiesCsv(src);
+  fs.copyFileSync(src, paths.csv());
+  log(`📄 Skopiowano plik CSV: ${src}`);
   return { path: paths.csv() };
 });
 

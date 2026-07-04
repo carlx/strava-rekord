@@ -68,6 +68,41 @@ function rowToActivity(row) {
   };
 }
 
+// Pierwsze 4 kolumny eksportu ze Stravy — wystarczają, żeby odróżnić właściwy
+// plik od przypadkowego innego CSV (reszta nagłówka ma duplikaty nazw kolumn,
+// patrz COL powyżej, więc nie da się prosto zweryfikować całości po nazwach).
+const REQUIRED_HEADER = ['Activity ID', 'Activity Date', 'Activity Name', 'Activity Type'];
+
+function readFirstLine(filePath) {
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    const buf = Buffer.alloc(8192);
+    const bytes = fs.readSync(fd, buf, 0, buf.length, 0);
+    return buf.toString('utf8', 0, bytes).split(/\r?\n/, 1)[0] ?? '';
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+// Rzuca, jeśli plik nie wygląda na eksport activities.csv ze Stravy —
+// wołane przed skopiowaniem wybranego pliku do katalogu aplikacji.
+function assertValidActivitiesCsv(filePath) {
+  const firstLine = readFirstLine(filePath);
+  let header;
+  try {
+    [header] = parse(firstLine, { relax_quotes: true });
+  } catch (e) {
+    throw new Error(`To nie jest poprawny plik CSV: ${e.message}`);
+  }
+  const ok = header && REQUIRED_HEADER.every((name, i) => header[i] === name);
+  if (!ok) {
+    throw new Error(
+      'To nie wygląda na eksport CSV ze Stravy (brak oczekiwanych kolumn: ' +
+      REQUIRED_HEADER.join(', ') + ').'
+    );
+  }
+}
+
 async function importCsv(log = () => {}) {
   const csvPath = paths.csv();
   if (!fs.existsSync(csvPath)) {
@@ -124,4 +159,4 @@ async function importCsv(log = () => {}) {
   return { rows: dataRows.length, added, updated, skipped, total: db.activities.length, submitted, pending };
 }
 
-module.exports = { importCsv };
+module.exports = { importCsv, assertValidActivitiesCsv };
