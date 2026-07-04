@@ -16,6 +16,8 @@
       </div>
     </header>
 
+    <div class="layout">
+    <div class="col-main">
     <section class="panel" id="status-panel">
       <div class="status-grid" id="status-grid"><!-- wypełniane z JS --></div>
       <button id="refresh" class="ghost">Odśwież status</button>
@@ -81,6 +83,9 @@
       </div>
     </section>
 
+    </div><!-- /col-main -->
+
+    <aside class="col-log">
     <section class="panel log-panel">
       <div class="log-head">
         <span>Log</span>
@@ -88,6 +93,8 @@
       </div>
       <pre id="log"></pre>
     </section>
+    </aside>
+    </div><!-- /layout -->
 
     <script src="renderer.js"></script>
   </body>

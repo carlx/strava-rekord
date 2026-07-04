@@ -13,10 +13,10 @@ const log = (line) => send('log', String(line));
 
 function createWindow() {
   mainWin = new BrowserWindow({
-    width: 940,
-    height: 760,
-    minWidth: 720,
-    minHeight: 560,
+    width: 1320,
+    height: 900,
+    minWidth: 900,
+    minHeight: 620,
     title: 'Strava Rekord',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
