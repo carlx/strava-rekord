@@ -84,6 +84,61 @@ function submitOpts(live) {
   };
 }
 
+// --- podgląd screenshotów ---
+let shotsMode = 'dry-run';
+
+async function loadShots() {
+  const list = $('shots-list');
+  const files = await window.api.listShots(shotsMode);
+  if (!files.length) {
+    list.innerHTML = '<li class="empty">(brak — uruchom dry-run ze screenshotem lub wysyłkę live)</li>';
+    $('shots-preview').innerHTML = '<p class="muted">Wybierz screenshot z listy…</p>';
+    return;
+  }
+  list.innerHTML = files
+    .map(
+      (f, i) =>
+        `<li data-i="${i}" title="${f.name}"><span>${f.id}</span><span class="kind">${f.kind}</span></li>`
+    )
+    .join('');
+  [...list.querySelectorAll('li[data-i]')].forEach((li) => {
+    li.onclick = () => showShot(files[Number(li.dataset.i)], li);
+  });
+}
+
+async function showShot(file, li) {
+  document.querySelectorAll('#shots-list li').forEach((el) => el.classList.remove('active'));
+  li.classList.add('active');
+  const preview = $('shots-preview');
+  preview.innerHTML = '<p class="muted">Ładowanie…</p>';
+  try {
+    const dataUrl = await window.api.readShot(file.path);
+    preview.innerHTML = '';
+    const btn = document.createElement('button');
+    btn.className = 'ghost open-native';
+    btn.textContent = 'Otwórz w podglądzie systemowym';
+    btn.onclick = () => window.api.openShot(file.path);
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    img.alt = file.name;
+    preview.appendChild(btn);
+    preview.appendChild(img);
+  } catch (e) {
+    preview.innerHTML = `<p class="warn">Nie udało się wczytać: ${e.message}</p>`;
+  }
+}
+
+function setShotsMode(mode) {
+  shotsMode = mode;
+  $('shots-dry').classList.toggle('active', mode === 'dry-run');
+  $('shots-live').classList.toggle('active', mode === 'live');
+  loadShots().catch((e) => logLine('❌ ' + e.message));
+}
+
+$('shots-dry').onclick = () => setShotsMode('dry-run');
+$('shots-live').onclick = () => setShotsMode('live');
+$('shots-refresh').onclick = () => loadShots().catch((e) => logLine('❌ ' + e.message));
+
 // --- wiring ---
 $('btn-login').onclick = () => window.api.runLogin();
 $('btn-logout').onclick = async () => {
@@ -107,7 +162,8 @@ $('clear-log').onclick = () => { logEl.textContent = ''; };
 
 window.api.onLog(logLine);
 window.api.onBusy(setBusy);
-window.api.onDone(() => { logLine('— gotowe —'); refreshStatus(); });
+window.api.onDone(() => { logLine('— gotowe —'); refreshStatus(); loadShots().catch(() => {}); });
 window.api.onError(() => {});
 
 refreshStatus().catch((e) => logLine('❌ ' + e.message));
+loadShots().catch((e) => logLine('❌ ' + e.message));

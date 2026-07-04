@@ -1,6 +1,7 @@
 // Port src/submit.js — pełna automatyzacja (z klikaniem "Prześlij") sterowana
 // systemowym Chrome. Screenshoty trafiają do katalogu aplikacji.
 const fs = require('node:fs');
+const path = require('node:path');
 const { launchChrome } = require('./chrome');
 const { loadConfig } = require('./config');
 const { paths } = require('./paths');
@@ -8,6 +9,8 @@ const { readDb, writeDb } = require('./db');
 const { buildPayload, fillForm, isEligible, ineligibleReason } = require('./mapping');
 
 async function processOne(ctx, activity, config, opts) {
+  // Dry-run i live trzymamy w osobnych podfolderach, żeby się nie nadpisywały.
+  const shotDir = path.join(paths.screenshots(), opts.live ? 'live' : 'dry-run');
   const page = await ctx.newPage();
   try {
     await page.goto(config.formUrl, { waitUntil: 'domcontentloaded' });
@@ -22,9 +25,9 @@ async function processOne(ctx, activity, config, opts) {
 
     // W trybie live zawsze zapisujemy oba screeny (audit). W dry-run honorujemy opcję.
     if (opts.live || opts.screenshot) {
-      fs.mkdirSync(paths.screenshots(), { recursive: true });
+      fs.mkdirSync(shotDir, { recursive: true });
       await page.screenshot({
-        path: `${paths.screenshots()}/${activity.id}-filled.png`,
+        path: path.join(shotDir, `${activity.id}-filled.png`),
         fullPage: true,
       });
     }
@@ -38,7 +41,7 @@ async function processOne(ctx, activity, config, opts) {
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
     await page.screenshot({
-      path: `${paths.screenshots()}/${activity.id}-confirm.png`,
+      path: path.join(shotDir, `${activity.id}-confirm.png`),
       fullPage: true,
     });
     return { ok: true, dryRun: false };

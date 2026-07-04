@@ -69,3 +69,20 @@ pre#log {
 #list-content th, #list-content td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border); }
 #list-content h3 { font-size: 14px; margin: 8px 0 6px; }
 .warn { color: var(--bad); font-size: 13px; }
+.muted { color: var(--muted); font-size: 13px; }
+
+.shots-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--muted); }
+.shots-controls { display: flex; gap: 6px; align-items: center; }
+button.toggle { background: transparent; color: var(--muted); border: 1px solid var(--border); font-weight: 500; padding: 5px 12px; font-size: 12px; }
+button.toggle.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+.shots-body { display: grid; grid-template-columns: 220px 1fr; gap: 12px; }
+#shots-list { list-style: none; margin: 0; padding: 0; max-height: 320px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+#shots-list li { padding: 6px 10px; font-size: 12px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 6px; }
+#shots-list li:hover { background: #8881; }
+#shots-list li.active { background: var(--orange); color: #fff; }
+#shots-list li .kind { opacity: 0.7; }
+#shots-list li.active .kind { opacity: 0.9; }
+#shots-list .empty { color: var(--muted); cursor: default; justify-content: flex-start; }
+#shots-preview { border: 1px solid var(--border); border-radius: 8px; padding: 8px; min-height: 200px; max-height: 460px; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+#shots-preview img { max-width: 100%; border: 1px solid var(--border); border-radius: 4px; }
+#shots-preview .open-native { align-self: flex-start; }

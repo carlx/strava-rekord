@@ -11,6 +11,9 @@ contextBridge.exposeInMainWorld('api', {
   cancel: () => ipcRenderer.send('cancel'),
   openDir: () => ipcRenderer.send('open-dir'),
   clearSession: () => ipcRenderer.invoke('logout'),
+  listShots: (mode) => ipcRenderer.invoke('list-shots', mode),
+  readShot: (filePath) => ipcRenderer.invoke('read-shot', filePath),
+  openShot: (filePath) => ipcRenderer.send('open-shot', filePath),
   // strumienie zdarzeń
   onLog: (cb) => ipcRenderer.on('log', (_e, line) => cb(line)),
   onBusy: (cb) => ipcRenderer.on('busy', (_e, b) => cb(b)),

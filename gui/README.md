@@ -62,3 +62,8 @@ ograniczone (np. `.dmg` realnie tylko na macOS).
 4. **Wyślij (LIVE)** — wysyła naprawdę; `Limit` ogranicza liczbę, `Stop`
    przerywa po bieżącej aktywności.
 5. **Pokaż listę** — co w zakresie dat jest wysłane / oczekuje.
+
+Screenshoty zapisują się w osobnych podfolderach, żeby się nie nadpisywały:
+`screenshots/dry-run/` i `screenshots/live/`. Panel **„Podgląd screenshotów”**
+w oknie pozwala je przeglądać (przełącznik Dry-run / Live) i otworzyć w
+podglądzie systemowym.

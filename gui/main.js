@@ -131,6 +131,50 @@ ipcMain.on('open-dir', () => {
   shell.openPath(paths.base());
 });
 
+// --- podgląd screenshotów (dry-run / live) ---
+function shotsDir(mode) {
+  const { paths } = require('./lib/paths');
+  return path.join(paths.screenshots(), mode === 'live' ? 'live' : 'dry-run');
+}
+// Ścieżka musi leżeć wewnątrz katalogu screenshots (ochrona przed path traversal).
+function assertInsideShots(filePath) {
+  const { paths } = require('./lib/paths');
+  const root = path.resolve(paths.screenshots());
+  const resolved = path.resolve(filePath);
+  if (resolved !== root && !resolved.startsWith(root + path.sep)) {
+    throw new Error('Niedozwolona ścieżka.');
+  }
+  return resolved;
+}
+
+ipcMain.handle('list-shots', async (_e, mode) => {
+  const dir = shotsDir(mode);
+  let names = [];
+  try {
+    names = fs.readdirSync(dir).filter((n) => n.toLowerCase().endsWith('.png'));
+  } catch { names = []; }
+  names.sort();
+  return names.map((name) => {
+    const m = name.match(/^(.*)-(filled|confirm)\.png$/i);
+    return {
+      name,
+      path: path.join(dir, name),
+      id: m ? m[1] : name,
+      kind: m ? m[2].toLowerCase() : '',
+    };
+  });
+});
+
+ipcMain.handle('read-shot', async (_e, filePath) => {
+  const resolved = assertInsideShots(filePath);
+  const buf = fs.readFileSync(resolved);
+  return 'data:image/png;base64,' + buf.toString('base64');
+});
+
+ipcMain.on('open-shot', (_e, filePath) => {
+  try { shell.openPath(assertInsideShots(filePath)); } catch { /* ignore */ }
+});
+
 // Usunięcie zapisanej sesji Chrome (profil trwały) — wymusza ponowne logowanie.
 ipcMain.handle('logout', async () => {
   if (busy) throw new Error('Inne zadanie trwa — poczekaj na zakończenie.');

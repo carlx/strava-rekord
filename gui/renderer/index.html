@@ -2,7 +2,7 @@
 <html lang="pl">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;" />
     <title>Strava Rekord</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -55,6 +55,21 @@
 
     <section class="panel" id="list-panel" hidden>
       <div id="list-content"></div>
+    </section>
+
+    <section class="panel" id="shots-panel">
+      <div class="shots-head">
+        <span>Podgląd screenshotów</span>
+        <span class="shots-controls">
+          <button id="shots-dry" class="toggle active">Dry-run</button>
+          <button id="shots-live" class="toggle">Live</button>
+          <button id="shots-refresh" class="link">Odśwież</button>
+        </span>
+      </div>
+      <div class="shots-body">
+        <ul id="shots-list"></ul>
+        <div id="shots-preview"><p class="muted">Wybierz screenshot z listy…</p></div>
+      </div>
     </section>
 
     <section class="panel log-panel">
