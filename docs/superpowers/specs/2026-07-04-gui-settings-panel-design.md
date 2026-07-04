@@ -56,12 +56,35 @@ const DEFAULT_CONFIG = {
 - Jeśli `config.json` nie istnieje → tworzy go: `{ ...DEFAULT_CONFIG, formUrl: '',
   displayName: '', dateFrom: <dziś ISO>, dateTo: <dziś+90dni ISO> }`, zapisuje na
   dysk, zwraca.
-- Jeśli istnieje → czyta jak dziś. Walidacja "formUrl/displayName niepuste"
-  **nie** blokuje samego `loadConfig()` (bo `status` i panel ustawień muszą
-  móc wczytać config z pustymi polami) — przenosi się do miejsc, które
-  faktycznie potrzebują kompletnego configu (import, submit — przez
-  `mapping.js`/`importCsv.js`/`submit.js`), z komunikatem odsyłającym do
-  panelu Ustawienia zamiast do `config.example.json`.
+- Jeśli istnieje → czyta plik i **merguje z `DEFAULT_CONFIG` na każdym
+  wczytaniu** (`{ ...DEFAULT_CONFIG, ...JSON.parse(raw) }`), nie tylko przy
+  tworzeniu — zabezpiecza to przypadek ręcznie edytowanego pliku, w którym
+  ktoś usunie/pominie `timeSource`/`skipTypes`/`typeMapping` (dzisiejszy
+  `if (!cfg.typeMapping) throw` znika, zastąpiony mergem).
+- Walidacja "formUrl/displayName niepuste" **nie** blokuje samego
+  `loadConfig()` (bo `status`, `list-shots`, panel ustawień i
+  `listActivities.js` muszą móc wczytać config z pustymi polami) — `loadConfig()`
+  zawsze zwraca obiekt, nigdy nie rzuca dla brakującego/pustego pola.
+
+Nowa funkcja `requireReady(config)` (eksportowana obok `loadConfig`):
+```js
+function requireReady(cfg) {
+  if (!cfg.formUrl) throw new Error('Uzupełnij link do formularza w panelu Ustawienia.');
+  if (!cfg.displayName) throw new Error('Uzupełnij imię i nazwisko w panelu Ustawienia.');
+  return cfg;
+}
+```
+Wołana jawnie w miejscach, które faktycznie potrzebują kompletnego configu:
+- `gui/lib/login.js:10` — `const config = requireReady(loadConfig());` (dziś
+  woła gołe `loadConfig()`; bez tej zmiany kliknięcie "Zaloguj do Google" przy
+  pustym `formUrl` poleci do `page.goto('')` i wywali się niezrozumiałym
+  błędem Playwrighta zamiast czytelnego komunikatu).
+- `gui/lib/submit.js:52` — analogicznie, `requireReady(loadConfig())`.
+
+Bez zmian (zostają na gołym `loadConfig()`, bo nie potrzebują formUrl/displayName):
+- `gui/lib/listActivities.js:6` — używa tylko `dateFrom`/`dateTo`/`typeMapping`.
+- `gui/main.js` (`status`, `list-shots`) — mają celowo tolerować niekompletny
+  config, żeby `needsSetup` mogło się w ogóle policzyć.
 
 `updateDateRange` → uogólnione na:
 
@@ -69,10 +92,11 @@ const DEFAULT_CONFIG = {
 function updateSettings({ formUrl, displayName, dateFrom, dateTo })
 ```
 
-Waliduje: `formUrl` niepuste i zaczyna się od `https://docs.google.com/forms/`;
-`displayName` niepuste; daty w formacie `YYYY-MM-DD`, `dateFrom <= dateTo` (jak
-dziś). Read-modify-write całego pliku — nadpisuje tylko te 4 pola, resztę
-zostawia nietkniętą.
+Waliduje: `formUrl` niepuste i zaczyna się od `https://` (celowo bez sztywnego
+wymogu `docs.google.com/forms/` — odrzuciłoby to poprawne krótkie linki
+`https://forms.gle/...`); `displayName` niepuste; daty w formacie `YYYY-MM-DD`,
+`dateFrom <= dateTo` (jak dziś). Read-modify-write całego pliku — nadpisuje
+tylko te 4 pola, resztę zostawia nietkniętą.
 
 `paths.configExample()` i przepływ "skopiuj `config.example.json`" znikają z
 GUI (pozostają nieużywane / do usunięcia z `gui/lib/paths.js`; sam plik
@@ -125,15 +149,26 @@ Reszta IPC (import/submit/list/logout/screenshoty) bez zmian.
 </section>
 ```
 
-`renderer.js`:
-- `refreshStatus()`: wypełnia pola `set-form-url`/`set-display-name`/
-  `set-date-from`/`set-date-to` wartościami ze `status()`, ale tylko gdy pole
-  nie jest aktualnie fokusowane (nie nadpisuje w trakcie pisania).
-- Gdy `status.needsSetup`: pokazuje `#settings-hint`, dodaje klasę
-  `.attention` na `#settings-panel`.
-- `#save-settings` click → `window.api.saveSettings({...})`; sukces odświeża
-  status; błędy walidacji lecą przez istniejący `onError`/log (ten sam wzorzec
-  co dzisiejszy `save-range`).
+`renderer.js` — zmiany do istniejącego kodu (nie tylko dodanie nowego):
+- `refreshStatus()` (dziś linie 40-43, `renderer.js:40-43`): usunąć
+  `$('date-from')`/`$('date-to')` (te id znikają z `index.html` razem z
+  `range-panel` — bez usunięcia tego kodu `$('date-from')` zwróci `null` i
+  `refreshStatus()` wywali się przy każdym odświeżeniu statusu). Zastąpić
+  wypełnianiem `set-form-url`/`set-display-name`/`set-date-from`/`set-date-to`
+  wartościami ze `status()` (potrzebne jest więc, żeby `status` IPC zwracał
+  też `formUrl`, patrz sekcja 2), ale tylko gdy dane pole nie jest aktualnie
+  fokusowane (nie nadpisuje w trakcie pisania).
+- `setBusy()` (dziś `renderer.js:55`): id `'save-range'` w tablicy przycisków
+  do wyłączenia zmienia się na `'save-settings'`.
+- Stary handler `$('save-range').onclick` (dziś `renderer.js:215-224`) —
+  usunąć całość, zastąpić nowym `$('save-settings').onclick`, który czyta
+  `set-form-url`/`set-display-name`/`set-date-from`/`set-date-to`, waliduje że
+  wszystkie 4 są niepuste (jak dziś robi to dla samych dat), woła
+  `window.api.saveSettings({ formUrl, displayName, dateFrom, dateTo })`,
+  odświeża status i (jeśli lista jest widoczna) listę — analogicznie do
+  dzisiejszego wzorca.
+- Nowe: gdy `status.needsSetup`, pokazuje `#settings-hint` i dodaje klasę
+  `.attention` na `#settings-panel`; w przeciwnym razie ukrywa/usuwa.
 
 `styles.css`: `.panel.attention { border-color: <akcent ostrzegawczy> }`,
 spójny z istniejącą paletą (`danger`/`secondary`).
