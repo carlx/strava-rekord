@@ -31,6 +31,8 @@ function createWindow() {
   mainWin.on('closed', () => { mainWin = null; });
 }
 
+ipcMain.handle('app-version', () => app.getVersion());
+
 // --- status (lekki, bez Playwrighta) ---
 ipcMain.handle('status', async () => {
   const { paths } = require('./lib/paths');

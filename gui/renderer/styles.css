@@ -20,6 +20,7 @@ body {
 }
 header { margin-bottom: 12px; }
 h1 { font-size: 19px; margin: 0 0 6px; }
+.version { font-size: 12px; font-weight: 400; color: var(--muted); vertical-align: middle; }
 .dir { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .dir code { background: #8881; padding: 1px 6px; border-radius: 4px; }
 

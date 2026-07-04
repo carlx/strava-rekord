@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('api', {
   // żądanie/odpowiedź
   status: () => ipcRenderer.invoke('status'),
+  getVersion: () => ipcRenderer.invoke('app-version'),
   saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
   list: () => ipcRenderer.invoke('list'),
   // start zadań długich (wynik leci przez onLog/onDone/onError)

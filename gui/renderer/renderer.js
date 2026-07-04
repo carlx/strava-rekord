@@ -300,5 +300,6 @@ window.api.onProgress((p) => { $('busy-count').textContent = ` (${p.current} z $
 window.api.onDone(() => { logLine('— gotowe —'); refreshStatus(); loadShots().catch(() => {}); });
 window.api.onError(() => {});
 
+window.api.getVersion().then((v) => { $('app-version').textContent = 'v' + v; });
 refreshStatus().catch((e) => logLine('❌ ' + e.message));
 loadShots().catch((e) => logLine('❌ ' + e.message));
