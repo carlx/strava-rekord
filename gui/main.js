@@ -11,6 +11,8 @@ function send(channel, payload) {
 }
 const log = (line) => send('log', String(line));
 
+const iconPath = path.join(__dirname, 'build', 'icon.png');
+
 function createWindow() {
   mainWin = new BrowserWindow({
     width: 1320,
@@ -18,6 +20,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 620,
     title: 'Strava Rekord',
+    icon: iconPath,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -252,6 +255,12 @@ ipcMain.handle('logout', async () => {
 });
 
 app.whenReady().then(() => {
+  // W trybie dev macOS pokazuje domyślną ikonę Electrona w docku — spakowana
+  // wersja ma własną (build/icon.icns) przez Info.plist, więc nadpisujemy
+  // tylko poza paczką.
+  if (process.platform === 'darwin' && !app.isPackaged && app.dock) {
+    app.dock.setIcon(iconPath);
+  }
   createWindow();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
