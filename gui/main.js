@@ -258,6 +258,8 @@ app.whenReady().then(() => {
   });
 });
 
+// Jednookienkowe narzędzie — zamknięcie okna ma kończyć całą appkę (także na
+// macOS, gdzie domyślnie Electron zostawia proces w tle/docku).
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  app.quit();
 });
