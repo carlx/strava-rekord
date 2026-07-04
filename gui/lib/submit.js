@@ -74,7 +74,7 @@ async function submit(opts, log = () => {}, shouldCancel = () => false) {
   log(`Już wysłane:       ${all.filter((a) => a.submitted).length}`);
   log(`Kwalifikujące się: ${eligible.length}`);
   log(`Przetworzę teraz:  ${todo.length}`);
-  log(`Tryb:              ${opts.live ? 'WYSYŁKA LIVE' : 'DRY-RUN'} | okno=${opts.headed ? 'widoczne' : 'ukryte'}`);
+  log(`Tryb:              ${opts.live ? 'WYSYŁKA LIVE' : 'DRY-RUN'}`);
   if (buckets.size) {
     log('Pominięte:');
     for (const [r, n] of buckets) log(`  ${String(n).padStart(4)}  ${r}`);
@@ -85,7 +85,7 @@ async function submit(opts, log = () => {}, shouldCancel = () => false) {
     return { processed: 0, ok: 0, fail: 0 };
   }
 
-  const ctx = await launchChrome({ headless: !opts.headed });
+  const ctx = await launchChrome({ headless: true });
   let ok = 0, fail = 0, processed = 0;
   try {
     for (let i = 0; i < todo.length; i++) {
