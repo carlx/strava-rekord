@@ -17,8 +17,11 @@ function statItem(k, v, cls = '') {
   return `<div class="stat"><span class="k">${k}</span><span class="v ${cls}">${v}</span></div>`;
 }
 
+let lastStatus = null;
+
 async function refreshStatus() {
   const s = await window.api.status();
+  lastStatus = s;
   $('appdir').textContent = s.base;
 
   const yn = (b) => (b ? ['tak', 'ok'] : ['nie', 'bad']);
@@ -52,6 +55,7 @@ async function refreshStatus() {
   $('settings-panel').classList.toggle('attention', !!s.needsSetup);
 
   if (s.configError) logOnce('config: ' + s.configError);
+  applyButtonStates();
 }
 
 function wrap([v, cls]) { return [v, cls]; }
@@ -61,11 +65,52 @@ function logOnce(msg) {
   if (msg !== lastConfigErr) { lastConfigErr = msg; logLine('⚠ ' + msg); }
 }
 
-function setBusy(b) {
-  for (const id of ['btn-login', 'btn-logout', 'btn-choose-csv', 'btn-import', 'btn-dry', 'btn-live', 'btn-list', 'refresh', 'save-settings']) {
-    $(id).disabled = b;
+let busy = false;
+
+// Blokuje przyciski, których kliknięcie i tak by się nie powiodło (np. wysyłkę
+// bez wcześniejszego zalogowania), z podpowiedzią w title czego brakuje.
+function applyButtonStates() {
+  for (const id of ['btn-login', 'btn-logout', 'btn-list', 'refresh', 'save-settings']) {
+    $(id).disabled = busy;
   }
-  $('btn-cancel').disabled = !b;
+  $('btn-cancel').disabled = !busy;
+
+  const s = lastStatus || {};
+  const needsSetup = s.configError ? true : !!s.needsSetup;
+  const hasSession = !!s.hasProfile;
+  const hasActivities = !!(s.counts && s.counts.total > 0);
+
+  const setGate = (id, blocked, reason) => {
+    const el = $(id);
+    el.disabled = busy || blocked;
+    el.title = (!busy && blocked) ? reason : '';
+  };
+
+  setGate('btn-choose-csv', needsSetup,
+    'Najpierw uzupełnij Ustawienia (link do formularza i imię/nazwisko).');
+  setGate('btn-import', needsSetup || !s.hasCsv,
+    needsSetup
+      ? 'Najpierw uzupełnij Ustawienia (link do formularza i imię/nazwisko).'
+      : 'Najpierw wgraj plik z aktywnościami.');
+
+  const submitBlocked = needsSetup || !hasSession || !hasActivities;
+  const submitReason = needsSetup
+    ? 'Najpierw uzupełnij Ustawienia (link do formularza i imię/nazwisko).'
+    : !hasSession
+      ? 'Najpierw zaloguj się do Google.'
+      : 'Najpierw wgraj plik z aktywnościami.';
+  setGate('btn-dry', submitBlocked, submitReason);
+  setGate('btn-live', submitBlocked, submitReason);
+}
+
+function setBusy(state) {
+  busy = !!(state && state.active);
+  applyButtonStates();
+
+  const banner = $('busy-banner');
+  banner.hidden = !busy;
+  $('busy-label').textContent = busy ? (state.label || 'Pracuję…') : '';
+  if (!busy) $('busy-count').textContent = '';
 }
 
 async function renderList() {
@@ -251,6 +296,7 @@ $('clear-log').onclick = () => { logEl.textContent = ''; };
 
 window.api.onLog(logLine);
 window.api.onBusy(setBusy);
+window.api.onProgress((p) => { $('busy-count').textContent = ` (${p.current} z ${p.total})`; });
 window.api.onDone(() => { logLine('— gotowe —'); refreshStatus(); loadShots().catch(() => {}); });
 window.api.onError(() => {});
 

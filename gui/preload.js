@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('api', {
   // strumienie zdarzeń
   onLog: (cb) => ipcRenderer.on('log', (_e, line) => cb(line)),
   onBusy: (cb) => ipcRenderer.on('busy', (_e, b) => cb(b)),
+  onProgress: (cb) => ipcRenderer.on('progress', (_e, p) => cb(p)),
   onDone: (cb) => ipcRenderer.on('done', (_e, r) => cb(r)),
   onError: (cb) => ipcRenderer.on('error', (_e, m) => cb(m)),
 });

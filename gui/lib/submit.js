@@ -48,7 +48,7 @@ async function processOne(ctx, activity, config, opts) {
   }
 }
 
-async function submit(opts, log = () => {}, shouldCancel = () => false) {
+async function submit(opts, log = () => {}, shouldCancel = () => false, onProgress = () => {}) {
   const config = requireReady(loadConfig());
   if (!fs.existsSync(paths.profile())) {
     throw new Error('Brak zapisanej sesji — najpierw kliknij „Zaloguj do Google”.');
@@ -95,6 +95,7 @@ async function submit(opts, log = () => {}, shouldCancel = () => false) {
       }
       const a = todo[i];
       processed++;
+      onProgress({ current: i + 1, total: todo.length });
       log(`[${i + 1}/${todo.length}] ${a.id}  ${a.date?.slice(0, 10)}  ${a.type}  ${a.name}`);
       const payload = buildPayload(a, config);
       log(`   -> ${payload.activityType} | ${payload.duration} | ${payload.distance} km`);

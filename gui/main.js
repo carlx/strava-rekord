@@ -89,17 +89,17 @@ function startTask(name) {
   if (busy) throw new Error('Inne zadanie już trwa.');
   busy = true;
   cancelFlag = false;
-  send('busy', true);
+  send('busy', { active: true, label: name });
   log(`\n▶ ${name}`);
 }
 function endTask(result) {
   busy = false;
-  send('busy', false);
+  send('busy', { active: false });
   send('done', result ?? null);
 }
 function failTask(err) {
   busy = false;
-  send('busy', false);
+  send('busy', { active: false });
   log(`❌ ${err.message}`);
   send('error', err.message);
 }
@@ -126,7 +126,7 @@ ipcMain.on('submit', async (_e, opts) => {
   try {
     startTask(opts.live ? 'Wysyłka (LIVE)' : 'Dry-run');
     const { submit } = require('./lib/submit');
-    const r = await submit(opts, log, () => cancelFlag);
+    const r = await submit(opts, log, () => cancelFlag, (p) => send('progress', p));
     endTask(r);
   } catch (e) { failTask(e); }
 });

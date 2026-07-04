@@ -16,6 +16,12 @@
       </div>
     </header>
 
+    <div id="busy-banner" class="busy-banner" hidden>
+      <span class="spinner" aria-hidden="true"></span>
+      <span id="busy-label"></span>
+      <span id="busy-count"></span>
+    </div>
+
     <div class="layout">
     <div class="col-main">
     <section class="panel" id="settings-panel">
@@ -66,6 +72,8 @@
             <input id="limit" type="number" min="1" placeholder="wszystkie" />
           </label>
         </div>
+        <p class="limit-hint">Ogranicza, ile aktywności appka przetworzy za
+           jednym razem — zostaw puste, żeby zrobić wszystkie naraz.</p>
         <div class="submit-row">
           <button id="btn-dry" class="secondary">Dry-run (nie wysyła)</button>
           <button id="btn-live" class="danger">3 · Wyślij (LIVE)</button>

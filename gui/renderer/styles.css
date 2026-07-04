@@ -28,6 +28,23 @@ h1 { font-size: 19px; margin: 0 0 6px; }
   border-radius: 10px; padding: 14px; margin-bottom: 12px;
 }
 
+.busy-banner {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  padding: 8px 12px; border-radius: 8px;
+  background: color-mix(in srgb, var(--orange) 12%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--orange) 35%, var(--border));
+  font-size: 13px;
+}
+.busy-banner[hidden] { display: none; }
+.busy-banner .spinner {
+  width: 13px; height: 13px; border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--orange) 35%, transparent);
+  border-top-color: var(--orange);
+  animation: spin 0.8s linear infinite; flex: none;
+}
+#busy-count { color: var(--muted); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* Układ: sterowanie po lewej, log po prawej */
 .layout { display: grid; grid-template-columns: 1fr minmax(360px, 460px); gap: 14px; align-items: start; }
 .col-main { min-width: 0; }
