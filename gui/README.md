@@ -37,9 +37,10 @@ wbudowanymi defaultami mapowania typów aktywności) — link do formularza,
 imię/nazwisko i zakres dat ustawia się w panelu **Ustawienia** w oknie
 aplikacji, bez ręcznej edycji pliku.
 
-`activities.csv` też nie trzeba ręcznie kopiować — przycisk **„Wybierz plik
-CSV…”** otwiera natywny dialog wyboru pliku i kopiuje go do katalogu
-aplikacji.
+`activities.csv` też nie trzeba ręcznie kopiować — przycisk **„Wgraj plik z
+aktywnościami”** otwiera natywny dialog wyboru pliku, sprawdza czy to
+faktycznie eksport CSV ze Stravy, kopiuje go do katalogu aplikacji i od razu
+importuje do bazy.
 
 ## Uruchomienie w trybie dev
 
@@ -66,8 +67,9 @@ ograniczone (np. `.dmg` realnie tylko na macOS).
 0. **Ustawienia** — link do formularza, imię/nazwisko i zakres dat. Przy
    pierwszym uruchomieniu pola są puste, panel podpowiada co uzupełnić.
 1. **Zaloguj do Google** — raz, otwiera Twój Chrome; zaloguj się ręcznie.
-2. **Wybierz plik CSV…** / **Importuj activities.csv** — wskazuje i wczytuje
-   eksport ze Stravy do bazy.
+2. **Wgraj plik z aktywnościami** — wybierz CSV pobrany ze Stravy; appka sama
+   go skopiuje i zaimportuje do bazy. Link „wczytaj ponownie już wgrany plik”
+   powtarza sam import bez ponownego wybierania pliku.
 3. **Dry-run** — wypełnia formularz bez wysyłki (zawsze zapisuje zrzut).
 4. **Wyślij (LIVE)** — wysyła naprawdę; `Limit` ogranicza liczbę, `Stop`
    przerywa po bieżącej aktywności.

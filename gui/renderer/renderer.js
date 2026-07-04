@@ -214,7 +214,10 @@ $('btn-logout').onclick = async () => {
 $('btn-choose-csv').onclick = async () => {
   try {
     const r = await window.api.chooseCsv();
-    if (r) await refreshStatus();
+    if (r) {
+      await refreshStatus();
+      window.api.runImport();
+    }
   } catch (e) { logLine('❌ ' + e.message); }
 };
 $('btn-import').onclick = () => window.api.runImport();
