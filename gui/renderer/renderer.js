@@ -84,7 +84,6 @@ function submitOpts(live) {
     live,
     limit: limitRaw ? Number(limitRaw) : Infinity,
     headed: $('headed').checked,
-    screenshot: $('screenshot').checked,
   };
 }
 

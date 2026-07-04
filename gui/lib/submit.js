@@ -23,14 +23,12 @@ async function processOne(ctx, activity, config, opts) {
     const payload = buildPayload(activity, config);
     await fillForm(page, payload);
 
-    // W trybie live zawsze zapisujemy oba screeny (audit). W dry-run honorujemy opcję.
-    if (opts.live || opts.screenshot) {
-      fs.mkdirSync(shotDir, { recursive: true });
-      await page.screenshot({
-        path: path.join(shotDir, `${activity.id}-filled.png`),
-        fullPage: true,
-      });
-    }
+    // Zrzut wypełnionego formularza zapisujemy zawsze (i w dry-run, i w live).
+    fs.mkdirSync(shotDir, { recursive: true });
+    await page.screenshot({
+      path: path.join(shotDir, `${activity.id}-filled.png`),
+      fullPage: true,
+    });
 
     if (!opts.live) {
       return { ok: true, dryRun: true };

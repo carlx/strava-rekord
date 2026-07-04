@@ -58,7 +58,7 @@ ograniczone (np. `.dmg` realnie tylko na macOS).
 
 1. **Zaloguj do Google** — raz, otwiera Twój Chrome; zaloguj się ręcznie.
 2. **Importuj activities.csv** — wczytuje eksport ze Stravy do bazy.
-3. **Dry-run** — wypełnia formularz bez wysyłki (opcjonalnie screenshot).
+3. **Dry-run** — wypełnia formularz bez wysyłki (zawsze zapisuje zrzut).
 4. **Wyślij (LIVE)** — wysyła naprawdę; `Limit` ogranicza liczbę, `Stop`
    przerywa po bieżącej aktywności.
 5. **Pokaż listę** — co w zakresie dat jest wysłane / oczekuje.
