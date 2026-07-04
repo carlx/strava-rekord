@@ -3,7 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('api', {
   // żądanie/odpowiedź
   status: () => ipcRenderer.invoke('status'),
-  saveRange: (range) => ipcRenderer.invoke('save-range', range),
+  saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
   list: () => ipcRenderer.invoke('list'),
   // start zadań długich (wynik leci przez onLog/onDone/onError)
   runImport: () => ipcRenderer.send('import'),

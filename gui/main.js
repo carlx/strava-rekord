@@ -46,7 +46,11 @@ ipcMain.handle('status', async () => {
     config = require('./lib/config').loadConfig();
     out.range = { from: config.dateFrom, to: config.dateTo };
     out.displayName = config.displayName;
+    out.formUrl = config.formUrl;
+    out.needsSetup = !config.formUrl || !config.displayName;
   } catch (e) {
+    // loadConfig() nie rzuca dla brakującego pliku/pól — tylko dla
+    // realnie uszkodzonego JSON-a (błąd parsowania).
     out.configError = e.message;
   }
 
@@ -66,11 +70,11 @@ ipcMain.handle('status', async () => {
   return out;
 });
 
-// --- zapis zakresu dat do config.json ---
-ipcMain.handle('save-range', async (_e, range) => {
-  const { updateDateRange } = require('./lib/config');
-  const r = updateDateRange(range);
-  log(`📅 Zakres dat zapisany: ${r.from} → ${r.to}`);
+// --- zapis ustawień (formUrl/displayName/zakres dat) do config.json ---
+ipcMain.handle('save-settings', async (_e, settings) => {
+  const { updateSettings } = require('./lib/config');
+  const r = updateSettings(settings);
+  log(`⚙️ Ustawienia zapisane: ${r.formUrl} / ${r.displayName} / ${r.from} → ${r.to}`);
   return r;
 });
 

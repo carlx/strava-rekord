@@ -1,13 +1,13 @@
 // Port src/login.js — otwiera widoczne okno systemowego Chrome, user loguje się
 // ręcznie do Google, sesja zapisuje się w trwałym profilu (katalog aplikacji).
 const { launchChrome } = require('./chrome');
-const { loadConfig } = require('./config');
+const { loadConfig, requireReady } = require('./config');
 const { paths } = require('./paths');
 
 const LOGIN_TIMEOUT_MS = 10 * 60 * 1000;
 
 async function login(log = () => {}) {
-  const config = loadConfig();
+  const config = requireReady(loadConfig());
   log('Otwieram Twój systemowy Chrome (profil trwały)…');
 
   const ctx = await launchChrome({ headless: false });

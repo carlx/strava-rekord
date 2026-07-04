@@ -37,10 +37,20 @@ async function refreshStatus() {
   if (s.displayName) cells.push(statItem('Podpis', s.displayName));
 
   $('status-grid').innerHTML = cells.join('');
+
+  const setIfIdle = (id, value) => {
+    const el = $(id);
+    if (document.activeElement !== el) el.value = value ?? '';
+  };
+  setIfIdle('set-form-url', s.formUrl);
+  setIfIdle('set-display-name', s.displayName);
   if (s.range) {
-    $('date-from').value = s.range.from || '';
-    $('date-to').value = s.range.to || '';
+    setIfIdle('set-date-from', s.range.from);
+    setIfIdle('set-date-to', s.range.to);
   }
+  $('settings-hint').hidden = !s.needsSetup;
+  $('settings-panel').classList.toggle('attention', !!s.needsSetup);
+
   if (s.configError) logOnce('config: ' + s.configError);
 }
 
@@ -52,7 +62,7 @@ function logOnce(msg) {
 }
 
 function setBusy(b) {
-  for (const id of ['btn-login', 'btn-logout', 'btn-import', 'btn-dry', 'btn-live', 'btn-list', 'refresh', 'save-range']) {
+  for (const id of ['btn-login', 'btn-logout', 'btn-import', 'btn-dry', 'btn-live', 'btn-list', 'refresh', 'save-settings']) {
     $(id).disabled = b;
   }
   $('btn-cancel').disabled = !b;
@@ -212,12 +222,17 @@ $('btn-live').onclick = () => {
 $('btn-cancel').onclick = () => window.api.cancel();
 $('btn-list').onclick = () => renderList().catch((e) => logLine('❌ ' + e.message));
 $('refresh').onclick = () => refreshStatus();
-$('save-range').onclick = async () => {
-  const dateFrom = $('date-from').value;
-  const dateTo = $('date-to').value;
-  if (!dateFrom || !dateTo) { logLine('⚠ Podaj obie daty.'); return; }
+$('save-settings').onclick = async () => {
+  const formUrl = $('set-form-url').value.trim();
+  const displayName = $('set-display-name').value.trim();
+  const dateFrom = $('set-date-from').value;
+  const dateTo = $('set-date-to').value;
+  if (!formUrl || !displayName || !dateFrom || !dateTo) {
+    logLine('⚠ Uzupełnij wszystkie pola ustawień.');
+    return;
+  }
   try {
-    await window.api.saveRange({ dateFrom, dateTo });
+    await window.api.saveSettings({ formUrl, displayName, dateFrom, dateTo });
     await refreshStatus();
     if (!$('list-panel').hidden) renderList().catch(() => {});
   } catch (e) { logLine('❌ ' + e.message); }

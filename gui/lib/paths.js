@@ -16,7 +16,6 @@ function appDir() {
 const paths = {
   base: appDir,
   config: () => path.join(appDir(), 'config.json'),
-  configExample: () => path.join(appDir(), 'config.example.json'),
   db: () => path.join(appDir(), 'db.json'),
   csv: () => path.join(appDir(), 'activities.csv'),
   screenshots: () => path.join(appDir(), 'screenshots'),

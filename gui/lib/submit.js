@@ -3,7 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { launchChrome } = require('./chrome');
-const { loadConfig } = require('./config');
+const { loadConfig, requireReady } = require('./config');
 const { paths } = require('./paths');
 const { readDb, writeDb } = require('./db');
 const { buildPayload, fillForm, isEligible, ineligibleReason } = require('./mapping');
@@ -49,7 +49,7 @@ async function processOne(ctx, activity, config, opts) {
 }
 
 async function submit(opts, log = () => {}, shouldCancel = () => false) {
-  const config = loadConfig();
+  const config = requireReady(loadConfig());
   if (!fs.existsSync(paths.profile())) {
     throw new Error('Brak zapisanej sesji — najpierw kliknij „Zaloguj do Google”.');
   }

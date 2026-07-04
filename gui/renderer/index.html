@@ -18,18 +18,30 @@
 
     <div class="layout">
     <div class="col-main">
+    <section class="panel" id="settings-panel">
+      <div class="settings-row">
+        <label>Link do formularza
+          <input id="set-form-url" type="text" placeholder="https://docs.google.com/forms/d/e/.../viewform" />
+        </label>
+      </div>
+      <div class="settings-row">
+        <label>Imię i nazwisko
+          <input id="set-display-name" type="text" placeholder="Imię Nazwisko" />
+        </label>
+      </div>
+      <div class="settings-row">
+        <label>Od <input id="set-date-from" type="date" /></label>
+        <label>Do <input id="set-date-to" type="date" /></label>
+        <button id="save-settings" class="secondary">Zapisz ustawienia</button>
+      </div>
+      <p id="settings-hint" class="muted" hidden>
+        Uzupełnij link do formularza i imię/nazwisko, żeby móc importować i wysyłać aktywności.
+      </p>
+    </section>
+
     <section class="panel" id="status-panel">
       <div class="status-grid" id="status-grid"><!-- wypełniane z JS --></div>
       <button id="refresh" class="ghost">Odśwież status</button>
-    </section>
-
-    <section class="panel" id="range-panel">
-      <div class="range-row">
-        <span class="range-title">Zakres dat</span>
-        <label>Od <input id="date-from" type="date" /></label>
-        <label>Do <input id="date-to" type="date" /></label>
-        <button id="save-range" class="secondary">Zapisz zakres</button>
-      </div>
     </section>
 
     <section class="panel actions">

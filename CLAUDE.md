@@ -84,6 +84,17 @@ the input/textbox. Distance is formatted `"km,mmm"` (e.g. `28,581`) from raw met
 `config.json` drives everything: `formUrl`, `displayName`, `dateFrom`/`dateTo`,
 `timeSource` (`moving`|`elapsed`), `skipTypes`, `typeMapping` (Strava type → form option).
 
+CLI (`src/`) requires the user to manually copy `config.example.json` → `config.json`.
+GUI (`gui/`) does not: `gui/lib/config.js` has a built-in `DEFAULT_CONFIG`
+(`timeSource`/`skipTypes`/`typeMapping`, same values as `config.example.json`) and
+auto-creates `config.json` on first `loadConfig()` call if missing, and merges
+`DEFAULT_CONFIG` into whatever is on disk on every load (so a hand-edited file
+missing those keys still works). Only `formUrl`/`displayName`/`dateFrom`/`dateTo`
+are user-editable, via the "Ustawienia" panel in the GUI (`updateSettings()` in
+`gui/lib/config.js`). `loadConfig()` never throws for missing/empty fields;
+`requireReady(config)` is the explicit check used by `login.js`/`submit.js` where a
+complete config is actually required.
+
 ## GUI-specific architecture
 
 - **"App directory" convention** (`gui/lib/paths.js`): all working files (config, db,

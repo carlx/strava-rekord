@@ -32,7 +32,12 @@ Wszystkie pliki robocze są czytane i tworzone w **katalogu aplikacji**:
 Dotyczy to: `config.json`, `activities.csv`, `db.json`, `screenshots/`,
 `.chrome-profile/`. Przycisk **„Otwórz”** w GUI otwiera ten katalog.
 
-> Dla wersji spakowanej: połóż `config.json` i `activities.csv` obok binarki.
+`config.json` tworzy się automatycznie przy pierwszym uruchomieniu (z
+wbudowanymi defaultami mapowania typów aktywności) — link do formularza,
+imię/nazwisko i zakres dat ustawia się w panelu **Ustawienia** w oknie
+aplikacji, bez ręcznej edycji pliku.
+
+> Dla wersji spakowanej: połóż `activities.csv` obok binarki.
 
 ## Uruchomienie w trybie dev
 
@@ -56,6 +61,8 @@ ograniczone (np. `.dmg` realnie tylko na macOS).
 
 ## Obsługa w oknie
 
+0. **Ustawienia** — link do formularza, imię/nazwisko i zakres dat. Przy
+   pierwszym uruchomieniu pola są puste, panel podpowiada co uzupełnić.
 1. **Zaloguj do Google** — raz, otwiera Twój Chrome; zaloguj się ręcznie.
 2. **Importuj activities.csv** — wczytuje eksport ze Stravy do bazy.
 3. **Dry-run** — wypełnia formularz bez wysyłki (zawsze zapisuje zrzut).
