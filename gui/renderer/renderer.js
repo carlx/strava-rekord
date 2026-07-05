@@ -292,6 +292,9 @@ $('save-settings').onclick = async () => {
   } catch (e) { logLine('❌ ' + e.message); }
 };
 $('open-dir').onclick = () => window.api.openDir();
+document.querySelectorAll('[data-ext]').forEach((a) => {
+  a.onclick = (e) => { e.preventDefault(); window.api.openExternal(a.dataset.ext); };
+});
 $('clear-log').onclick = () => { logEl.textContent = ''; };
 
 window.api.onLog(logLine);

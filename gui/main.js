@@ -148,6 +148,10 @@ ipcMain.on('open-dir', () => {
   shell.openPath(paths.base());
 });
 
+ipcMain.on('open-external', (_e, url) => {
+  if (/^https:\/\//.test(url)) shell.openExternal(url);
+});
+
 // Wybór pliku CSV przez natywny dialog — kopiuje go do katalogu aplikacji
 // (paths.csv()), tak by dalszy import działał jak dziś.
 ipcMain.handle('choose-csv', async () => {

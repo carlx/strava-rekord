@@ -65,6 +65,11 @@ h1 { font-size: 19px; margin: 0 0 6px; }
 .actions .step { margin-bottom: 14px; }
 .actions .step:last-child { margin-bottom: 0; }
 .actions .step p { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+.csv-help { margin: 6px 0 0; font-size: 12px; }
+.csv-help summary { cursor: pointer; color: var(--orange); font-weight: 500; }
+.csv-help ol { margin: 6px 0 0; padding-left: 18px; color: var(--muted); }
+.csv-help li { margin-bottom: 3px; }
+.csv-help a { color: var(--orange); }
 .submit-step { border-top: 1px dashed var(--border); padding-top: 14px; }
 .submit-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
 .submit-row:last-child { margin-bottom: 0; }
