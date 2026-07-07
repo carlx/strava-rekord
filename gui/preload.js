@@ -5,6 +5,8 @@ contextBridge.exposeInMainWorld('api', {
   status: () => ipcRenderer.invoke('status'),
   getVersion: () => ipcRenderer.invoke('app-version'),
   saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
+  addTypeMapping: (m) => ipcRenderer.invoke('add-type-mapping', m),
+  removeTypeMapping: (t) => ipcRenderer.invoke('remove-type-mapping', t),
   list: () => ipcRenderer.invoke('list'),
   // start zadań długich (wynik leci przez onLog/onDone/onError)
   runImport: () => ipcRenderer.send('import'),

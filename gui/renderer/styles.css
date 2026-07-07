@@ -109,6 +109,19 @@ pre#log {
 #settings-panel.attention { border-color: var(--bad); }
 #settings-hint { margin: 8px 0 0; }
 
+.mapping-head { font-weight: 600; margin-bottom: 8px; }
+#mapping-list { list-style: none; margin: 0 0 10px; padding: 0; }
+#mapping-list li { padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+#mapping-list li:last-child { border-bottom: none; }
+#mapping-list li.empty { color: var(--muted); }
+#mapping-list .map-type { font-weight: 600; }
+#mapping-list .map-remove { margin-left: auto; }
+.mapping-add-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.mapping-add-row input[type="text"] { padding: 5px 7px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); color: inherit; flex: 1 1 auto; min-width: 0; }
+.mapping-add-row select { padding: 5px 7px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); color: inherit; }
+#unmapped-hint { margin: 0 0 10px; }
+.unmapped-chip { background: #8882; padding: 2px 8px; border-radius: 999px; margin: 0 2px; }
+
 .shots-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--muted); }
 .shots-controls { display: flex; gap: 6px; align-items: center; }
 button.toggle { background: transparent; color: var(--muted); border: 1px solid var(--border); font-weight: 500; padding: 5px 12px; font-size: 12px; }

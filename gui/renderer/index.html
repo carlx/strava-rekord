@@ -45,6 +45,20 @@
       </p>
     </section>
 
+    <section class="panel" id="mapping-panel">
+      <div class="mapping-head">Mapowanie typów aktywności</div>
+      <p id="unmapped-hint" class="warn" hidden>
+        Niezmapowane typy: <span id="unmapped-chips"></span>
+        — kliknij typ, żeby go szybko dodać poniżej.
+      </p>
+      <ul id="mapping-list"><!-- wypełniane z JS --></ul>
+      <div class="mapping-add-row">
+        <input id="map-new-type" type="text" placeholder="typ ze Stravy, np. TrailRun" />
+        <select id="map-new-target"><!-- wypełniane z JS --></select>
+        <button id="map-add" class="secondary">Dodaj</button>
+      </div>
+    </section>
+
     <section class="panel" id="status-panel">
       <div class="status-grid" id="status-grid"><!-- wypełniane z JS --></div>
       <button id="refresh" class="ghost">Odśwież status</button>

@@ -38,12 +38,14 @@ ipcMain.handle('status', async () => {
   const { paths } = require('./lib/paths');
   const { readDb } = require('./lib/db');
 
+  const { FORM_OPTIONS } = require('./lib/config');
   const out = {
     base: paths.base(),
     hasConfig: fs.existsSync(paths.config()),
     hasCsv: fs.existsSync(paths.csv()),
     hasDb: fs.existsSync(paths.db()),
     hasProfile: fs.existsSync(paths.profile()),
+    formOptions: FORM_OPTIONS,
   };
 
   let config = null;
@@ -60,7 +62,7 @@ ipcMain.handle('status', async () => {
   }
 
   try {
-    const { isEligible } = require('./lib/mapping');
+    const { isEligible, unmappedTypeCounts } = require('./lib/mapping');
     const db = readDb();
     const all = db.activities;
     out.counts = {
@@ -68,6 +70,8 @@ ipcMain.handle('status', async () => {
       submitted: all.filter((a) => a.submitted).length,
       eligible: config ? all.filter((a) => isEligible(a, config)).length : null,
     };
+    out.typeMapping = config?.typeMapping ?? {};
+    out.unmappedTypes = config ? unmappedTypeCounts(all, config) : [];
   } catch {
     /* baza nieczytelna — pomijamy liczniki */
   }
@@ -81,6 +85,20 @@ ipcMain.handle('save-settings', async (_e, settings) => {
   const r = updateSettings(settings);
   log(`⚙️ Ustawienia zapisane: ${r.formUrl} / ${r.displayName} / ${r.from} → ${r.to}`);
   return r;
+});
+
+ipcMain.handle('add-type-mapping', async (_e, { stravaType, formOption }) => {
+  const { addTypeMapping } = require('./lib/config');
+  const mapping = addTypeMapping(stravaType, formOption);
+  log(`🗺️ Mapowanie dodane: ${stravaType} → ${formOption}`);
+  return mapping;
+});
+
+ipcMain.handle('remove-type-mapping', async (_e, stravaType) => {
+  const { removeTypeMapping } = require('./lib/config');
+  const mapping = removeTypeMapping(stravaType);
+  log(`🗺️ Mapowanie usunięte: ${stravaType}`);
+  return mapping;
 });
 
 // --- lista (lekka) ---

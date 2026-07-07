@@ -1,6 +1,11 @@
 const fs = require('node:fs');
 const { paths } = require('./paths');
 
+// Opcje pytania "Rodzaj aktywności" w formularzu Google — stałe, potwierdzone
+// realnym zrzutem form-fields.json (inspectForm.js). User nie może ich
+// zmieniać w GUI, tylko wybierać jako cel mapowania.
+const FORM_OPTIONS = ['Jazda na rowerze', 'Spacery/wędrówki górskie', 'Bieganie'];
+
 // Domyślne wartości, z których korzysta config.json tworzony automatycznie
 // przy pierwszym uruchomieniu — i którymi domergowujemy braki w ręcznie
 // edytowanym pliku. Wartości identyczne jak w (CLI-owym) config.example.json.
@@ -81,4 +86,34 @@ function updateSettings({ formUrl, displayName, dateFrom, dateTo }) {
   return { formUrl: cfg.formUrl, displayName: cfg.displayName, from: cfg.dateFrom, to: cfg.dateTo };
 }
 
-module.exports = { loadConfig, updateSettings, requireReady };
+// Dodaje/nadpisuje jeden wpis typeMapping (upsert) — wołane z GUI.
+function addTypeMapping(stravaType, formOption) {
+  const key = (stravaType ?? '').trim();
+  if (!key) throw new Error('Podaj typ aktywności ze Stravy.');
+  if (!FORM_OPTIONS.includes(formOption)) throw new Error('Nieprawidłowa opcja formularza.');
+  const cfg = loadConfig();
+  cfg.typeMapping = { ...cfg.typeMapping, [key]: formOption };
+  fs.writeFileSync(paths.config(), JSON.stringify(cfg, null, 2) + '\n');
+  return cfg.typeMapping;
+}
+
+// Usuwa wpis typeMapping — no-op, jeśli klucz nie istnieje.
+function removeTypeMapping(stravaType) {
+  const cfg = loadConfig();
+  delete cfg.typeMapping[stravaType];
+  fs.writeFileSync(paths.config(), JSON.stringify(cfg, null, 2) + '\n');
+  return cfg.typeMapping;
+}
+
+// Wołane wyłącznie z importCsv.js przy zupełnie pierwszym imporcie —
+// addytywne, nigdy nie nadpisuje istniejących kluczy.
+function mergeTypeMappingDefaults(defaults) {
+  const cfg = loadConfig();
+  cfg.typeMapping = { ...defaults, ...cfg.typeMapping };
+  fs.writeFileSync(paths.config(), JSON.stringify(cfg, null, 2) + '\n');
+}
+
+module.exports = {
+  loadConfig, updateSettings, requireReady,
+  addTypeMapping, removeTypeMapping, mergeTypeMappingDefaults, FORM_OPTIONS,
+};

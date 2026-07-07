@@ -66,6 +66,11 @@ ograniczone (np. `.dmg` realnie tylko na macOS).
 
 0. **Ustawienia** — link do formularza, imię/nazwisko i zakres dat. Przy
    pierwszym uruchomieniu pola są puste, panel podpowiada co uzupełnić.
+   Obok: **Mapowanie typów aktywności** — który typ ze Stravy (np. `Ride`,
+   `Jazda`) ląduje pod którą opcją formularza. Przy pierwszym imporcie appka
+   sama dopełnia sensowny domyślny zestaw dla wykrytego języka pliku; jeśli
+   jakiś typ nie ma mapowania, panel pokazuje go z licznikiem — kliknięcie
+   wypełnia pole dodawania.
 1. **Zaloguj do Google** — raz, otwiera Twój Chrome; zaloguj się ręcznie.
 2. **Wgraj plik z aktywnościami** — wybierz CSV pobrany ze Stravy; appka sama
    go skopiuje i zaimportuje do bazy. Link „wczytaj ponownie już wgrany plik”

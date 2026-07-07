@@ -78,6 +78,19 @@ function isEligible(activity, config) {
   return ineligibleReason(activity, config) === null;
 }
 
+// Typy aktywności bez mapowania (i nie na liście pominiętych) — do sygnału
+// w GUI "dodaj brakujące mapowanie". Posortowane malejąco po liczności.
+function unmappedTypeCounts(activities, config) {
+  const counts = new Map();
+  for (const a of activities) {
+    if (!a.type || config.skipTypes?.includes(a.type) || mapType(a.type, config)) continue;
+    counts.set(a.type, (counts.get(a.type) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([type, count]) => ({ type, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
 // Google Forms nie renderuje prawdziwych <label> — każde pytanie jest w
 // div[role="listitem"] z nagłówkiem w środku. Lokalizujemy po listitem
 // zawierającym nagłówek i sięgamy do inputa/textboxa w środku.
@@ -115,5 +128,6 @@ module.exports = {
   isInDateRange,
   ineligibleReason,
   isEligible,
+  unmappedTypeCounts,
   fillForm,
 };

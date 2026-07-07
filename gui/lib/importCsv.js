@@ -7,6 +7,7 @@ require('dayjs/locale/pl');
 require('dayjs/locale/de');
 const { paths } = require('./paths');
 const { readDb, writeDb } = require('./db');
+const { mergeTypeMappingDefaults } = require('./config');
 
 dayjs.extend(customParseFormat);
 
@@ -87,11 +88,32 @@ function rowToActivity(row) {
 // duplikaty nazw kolumn, patrz COL powyżej, więc nie da się prosto zweryfikować
 // całości po nazwach). PL zweryfikowane na prawdziwym eksporcie; DE to
 // best-effort zgadywanka (brak próbki) — do poprawienia, gdyby się nie zgadzało.
-const REQUIRED_HEADER_VARIANTS = [
-  ['Activity ID', 'Activity Date', 'Activity Name', 'Activity Type'],
-  ['Identyfikator aktywności', 'Data aktywności', 'Nazwa aktywności', 'Rodzaj aktywności'],
-  ['Aktivitäts-ID', 'Datum der Aktivität', 'Name der Aktivität', 'Aktivitätstyp'],
+const HEADER_VARIANTS = [
+  { lang: 'en', header: ['Activity ID', 'Activity Date', 'Activity Name', 'Activity Type'] },
+  { lang: 'pl', header: ['Identyfikator aktywności', 'Data aktywności', 'Nazwa aktywności', 'Rodzaj aktywności'] },
+  { lang: 'de', header: ['Aktivitäts-ID', 'Datum der Aktivität', 'Name der Aktivität', 'Aktivitätstyp'] },
 ];
+
+function detectHeaderLanguage(header) {
+  const match = HEADER_VARIANTS.find(
+    (v) => header && v.header.every((name, i) => header[i] === name)
+  );
+  return match ? match.lang : null;
+}
+
+// Domyślne mapowanie Strava-typ -> opcja formularza per wykryty język
+// nagłówka, dopisywane do config.json tylko przy zupełnie pierwszym imporcie
+// (patrz importCsv niżej). "en" potwierdzone od lat (= DEFAULT_CONFIG w
+// config.js); "pl" Jazda/Spacer potwierdzone na realnym eksporcie, Bieganie
+// to rozsądne ale niezweryfikowane domniemanie; "de" to best-effort
+// zgadywanka (brak próbki) — celowo bez Hike/TrailRun dla PL/DE, żeby
+// błędny domysł nie podstawił cicho złej kategorii (lepiej żeby taki typ
+// trafił do sygnału "niezmapowane" w GUI).
+const DEFAULT_TYPE_MAPPING_BY_LANG = {
+  en: { Ride: 'Jazda na rowerze', Walk: 'Spacery/wędrówki górskie', Hike: 'Spacery/wędrówki górskie', Run: 'Bieganie', TrailRun: 'Bieganie' },
+  pl: { Jazda: 'Jazda na rowerze', Spacer: 'Spacery/wędrówki górskie', Bieganie: 'Bieganie' },
+  de: { Radfahren: 'Jazda na rowerze', Wandern: 'Spacery/wędrówki górskie', Laufen: 'Bieganie' },
+};
 
 function readFirstLine(filePath) {
   const fd = fs.openSync(filePath, 'r');
@@ -114,9 +136,7 @@ function assertValidActivitiesCsv(filePath) {
   } catch (e) {
     throw new Error(`To nie jest poprawny plik CSV: ${e.message}`);
   }
-  const ok = header && REQUIRED_HEADER_VARIANTS.some(
-    (variant) => variant.every((name, i) => header[i] === name)
-  );
+  const ok = detectHeaderLanguage(header) !== null;
   if (!ok) {
     throw new Error(
       'To nie wygląda na eksport CSV ze Stravy (obsługiwane języki: PL, EN, DE; ' +
@@ -133,9 +153,20 @@ async function importCsv(log = () => {}) {
 
   const content = fs.readFileSync(csvPath, 'utf8');
   const rows = parse(content, { skip_empty_lines: true, relax_quotes: true });
-  const [, ...dataRows] = rows;
+  const [header, ...dataRows] = rows;
 
   const db = readDb();
+
+  // Zupełnie pierwszy import (pusta baza) — dopełnij domyślne mapowanie dla
+  // wykrytego języka pliku, nie nadpisując niczego (mergeTypeMappingDefaults
+  // jest addytywne). Kolejne importy, nawet w innym języku, tego nie ruszają.
+  if (db.activities.length === 0) {
+    const lang = detectHeaderLanguage(header);
+    if (lang && lang !== 'en' && DEFAULT_TYPE_MAPPING_BY_LANG[lang]) {
+      mergeTypeMappingDefaults(DEFAULT_TYPE_MAPPING_BY_LANG[lang]);
+    }
+  }
+
   const existing = new Map(db.activities.map((a) => [a.id, a]));
 
   let added = 0, updated = 0, skipped = 0;

@@ -56,6 +56,36 @@ async function refreshStatus() {
 
   if (s.configError) logOnce('config: ' + s.configError);
   applyButtonStates();
+  renderMapping(s);
+}
+
+function renderMapping(s) {
+  const typeMapping = s.typeMapping ?? {};
+  const formOptions = s.formOptions ?? [];
+  const unmappedTypes = s.unmappedTypes ?? [];
+
+  $('mapping-list').innerHTML = Object.entries(typeMapping).map(([type, target]) => `
+    <li data-type="${esc(type)}">
+      <span class="map-type">${esc(type)}</span> → <span class="map-target">${esc(target)}</span>
+      <button class="link map-remove" data-type="${esc(type)}">usuń</button>
+    </li>
+  `).join('') || '<li class="empty">(brak wpisów)</li>';
+  [...document.querySelectorAll('#mapping-list .map-remove')].forEach((btn) => {
+    btn.onclick = async () => {
+      try { await window.api.removeTypeMapping(btn.dataset.type); await refreshStatus(); }
+      catch (e) { logLine('❌ ' + e.message); }
+    };
+  });
+
+  $('map-new-target').innerHTML = formOptions.map((o) => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
+
+  $('unmapped-hint').hidden = !unmappedTypes.length;
+  $('unmapped-chips').innerHTML = unmappedTypes.map(({ type, count }) =>
+    `<button class="link unmapped-chip" data-type="${esc(type)}">${esc(type)} (${count})</button>`
+  ).join(' ');
+  [...document.querySelectorAll('.unmapped-chip')].forEach((chip) => {
+    chip.onclick = () => { $('map-new-type').value = chip.dataset.type; $('map-new-type').focus(); };
+  });
 }
 
 function wrap([v, cls]) { return [v, cls]; }
@@ -289,6 +319,16 @@ $('save-settings').onclick = async () => {
     await window.api.saveSettings({ formUrl, displayName, dateFrom, dateTo });
     await refreshStatus();
     if (!$('list-panel').hidden) renderList().catch(() => {});
+  } catch (e) { logLine('❌ ' + e.message); }
+};
+$('map-add').onclick = async () => {
+  const stravaType = $('map-new-type').value.trim();
+  const formOption = $('map-new-target').value;
+  if (!stravaType) { logLine('⚠ Podaj typ aktywności ze Stravy.'); return; }
+  try {
+    await window.api.addTypeMapping({ stravaType, formOption });
+    $('map-new-type').value = '';
+    await refreshStatus();
   } catch (e) { logLine('❌ ' + e.message); }
 };
 $('open-dir').onclick = () => window.api.openDir();
