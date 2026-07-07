@@ -78,6 +78,20 @@ at a temp dir — see prior scratchpad tests for the pattern.
 `import.js`, using the CSV's *detailed* duplicate columns), writes `db.json`. Import is
 idempotent and **preserves `submitted`/`submittedAt`/`submitError`** across re-imports.
 
+**Strava localizes the CSV export per account language** — confirmed on a real Polish
+export: headers, the date string format (day-before-month, 24h clock, localized month
+abbreviation — not just the month name), and activity-type *values* (e.g. `"Jazda"` not
+`"Ride"`) all change. Column *order* stays the same, so positional `COL` parsing is
+unaffected, and numeric columns in the detailed block stay period-decimal regardless of
+language (only the separate, unused "summary" block uses locale-formatted commas). GUI
+(`gui/lib/importCsv.js`) handles PL/EN/DE: header validation accepts known variants per
+language, `parseDate` tries a list of `{format, locale}` candidates via dayjs
+`customParseFormat`. The DE variant is an unverified best-effort guess (no real German
+sample obtained) — fix header/date strings there if a real DE export contradicts them.
+Translated activity-type values need no code change: `typeMapping` in `config.json` is
+user-editable, so a non-English user just sets its keys to match their own CSV's type
+strings. This is GUI-only — `src/import.js` (CLI) was not updated to match.
+
 **submit** filters `db.json` for eligible activities (`isEligible`: in date range, has a
 `typeMapping`, not a `skipType`, not already submitted), then for each: `buildPayload` →
 `fillForm`. Form fields have no real `<label>`s, so `fillForm` locates each question by
