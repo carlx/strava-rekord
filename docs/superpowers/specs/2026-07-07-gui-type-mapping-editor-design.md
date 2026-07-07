@@ -72,10 +72,15 @@ Celowo **bez** zgadywania PL/DE odpowiedników `Hike`/`TrailRun` — lepiej żeb
 taki typ trafił do sygnału "niezmapowane" (sekcja 3) niż żeby błędny domysł po
 cichu przypisał aktywność do złej kategorii formularza.
 
-W `importCsv()`: **przed** przetworzeniem wierszy, jeśli `readDb().activities.length === 0`,
-wywołaj `detectHeaderLanguage(header)` na wczytanym nagłówku pliku i, jeśli
-język ≠ `null` i ≠ `'en'` (en jest już zawsze pokryty przez `DEFAULT_CONFIG`),
-zawołaj `mergeTypeMappingDefaults(DEFAULT_TYPE_MAPPING_BY_LANG[lang])` z
+W `importCsv()`: dziś nagłówek jest odrzucany przy destrukturyzacji
+(`const [, ...dataRows] = rows;`) — trzeba go zachować (`const [header,
+...dataRows] = rows;`). `db` jest już wczytane linijkę wyżej (`const db =
+readDb();`) — używamy TEGO SAMEGO `db.activities.length === 0` (bez
+ponownego `readDb()`) jako testu "pierwszy import", **przed** pętlą
+przetwarzającą wiersze. Jeśli `true`, wywołaj `detectHeaderLanguage(header)`
+i, jeśli język ≠ `null` i ≠ `'en'` (en jest już zawsze pokryty przez
+`DEFAULT_CONFIG`), zawołaj
+`mergeTypeMappingDefaults(DEFAULT_TYPE_MAPPING_BY_LANG[lang])` z
 `gui/lib/config.js`.
 
 ## 2. Edycja mapowania — `gui/lib/config.js` + IPC
@@ -119,10 +124,18 @@ function mergeTypeMappingDefaults(defaults) {
 mergeTypeMappingDefaults, FORM_OPTIONS`.
 
 `gui/main.js`:
-- `status` handler: `out.typeMapping = config.typeMapping`, `out.formOptions
-  = FORM_OPTIONS`, `out.unmappedTypes = unmappedTypeCounts(db.activities,
-  config)` (patrz sekcja 3) — dorzucane obok istniejących pól, w tym samym
-  try/catch co dziś.
+- `status` handler: `out.formOptions = FORM_OPTIONS` (nie zależy od configu,
+  można dodać zawsze). `out.typeMapping = config?.typeMapping ?? {}` i
+  `out.unmappedTypes = config ? unmappedTypeCounts(db.activities, config) :
+  []` — **musi być guardowane**, bo `config` bywa `null`, gdy `loadConfig()`
+  rzuci (uszkodzony JSON, patrz istniejący catch przy `out.configError`).
+  Dzisiejszy kod już ma ten sam problem rozwiązany dla `out.counts.eligible`
+  (`config ? all.filter(...) : null`) — nowe pola muszą iść tym samym
+  wzorcem, **w tym samym try/catch, ale nie rzucać przed policzeniem
+  `out.counts`** (bez guardu, `unmappedTypeCounts` wywołane na `null`
+  configu wywaliłoby też liczenie `out.counts` w tym samym bloku —
+  regresja względem dzisiejszego zachowania, gdzie `counts` liczy się
+  niezależnie od poprawności configu).
 - Nowe handlery: `ipcMain.handle('add-type-mapping', (_e, { stravaType,
   formOption }) => addTypeMapping(stravaType, formOption))`,
   `ipcMain.handle('remove-type-mapping', (_e, stravaType) =>
@@ -170,10 +183,12 @@ Nowy panel w `gui/renderer/index.html`, zaraz po panelu "Ustawienia":
 ```
 
 `gui/renderer/renderer.js`: `renderMapping(s)` wołane z `refreshStatus()` —
-buduje `#mapping-list` z `s.typeMapping`, opcje `<select>` z `s.formOptions`,
-chipy z `s.unmappedTypes` (klik → wpisuje typ w `#map-new-type` i fokusuje
-pole). Usuwanie wiersza → `window.api.removeTypeMapping(type)` → odśwież.
-Dodawanie → walidacja niepustego typu w JS (wzorem `save-settings`) →
+buduje `#mapping-list` z `s.typeMapping ?? {}`, opcje `<select>` z
+`s.formOptions ?? []`, chipy z `s.unmappedTypes ?? []` (klik → wpisuje typ w
+`#map-new-type` i fokusuje pole) — te same guardy co po stronie main.js, bo
+`status()` może przyjść bez tych pól przy uszkodzonym configu. Usuwanie
+wiersza → `window.api.removeTypeMapping(type)` → odśwież. Dodawanie →
+walidacja niepustego typu w JS (wzorem `save-settings`) →
 `window.api.addTypeMapping({ stravaType, formOption })` → odśwież i wyczyść
 pole.
 
