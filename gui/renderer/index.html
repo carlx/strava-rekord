@@ -53,7 +53,8 @@
       </p>
       <ul id="mapping-list"><!-- wypełniane z JS --></ul>
       <div class="mapping-add-row">
-        <input id="map-new-type" type="text" placeholder="typ ze Stravy, np. TrailRun" />
+        <input id="map-new-type" type="text" list="known-types" placeholder="typ ze Stravy, np. TrailRun" />
+        <datalist id="known-types"></datalist>
         <select id="map-new-target"><!-- wypełniane z JS --></select>
         <button id="map-add" class="secondary">Dodaj</button>
       </div>

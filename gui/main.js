@@ -72,6 +72,7 @@ ipcMain.handle('status', async () => {
     };
     out.typeMapping = config?.typeMapping ?? {};
     out.unmappedTypes = config ? unmappedTypeCounts(all, config) : [];
+    out.allTypes = [...new Set(all.map((a) => a.type).filter(Boolean))].sort();
   } catch {
     /* baza nieczytelna — pomijamy liczniki */
   }

@@ -78,6 +78,7 @@ function renderMapping(s) {
   });
 
   $('map-new-target').innerHTML = formOptions.map((o) => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
+  $('known-types').innerHTML = (s.allTypes ?? []).map((t) => `<option value="${esc(t)}"></option>`).join('');
 
   $('unmapped-hint').hidden = !unmappedTypes.length;
   $('unmapped-chips').innerHTML = unmappedTypes.map(({ type, count }) =>
