@@ -3,12 +3,23 @@ const fs = require('node:fs');
 const { parse } = require('csv-parse/sync');
 const dayjs = require('dayjs');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
+require('dayjs/locale/pl');
+require('dayjs/locale/de');
 const { paths } = require('./paths');
 const { readDb, writeDb } = require('./db');
 
 dayjs.extend(customParseFormat);
 
-const DATE_FORMAT = 'MMM D, YYYY, h:mm:ss A';
+// Strava formatuje datę inaczej w zależności od języka konta — nie tylko
+// nazwę miesiąca, ale też kolejność dzień/miesiąc i zegar 12h/24h. Próbujemy
+// po kolei, pierwszy dopasowany wygrywa.
+// EN i PL zweryfikowane na prawdziwych eksportach; DE to best-effort zgadywanka
+// (brak próbki niemieckiego eksportu) — do poprawienia, gdyby się nie zgadzało.
+const DATE_FORMATS = [
+  { format: 'MMM D, YYYY, h:mm:ss A', locale: 'en' }, // "Jun 22, 2026, 3:04:12 PM"
+  { format: 'D MMM YYYY, HH:mm:ss', locale: 'pl' },   // "2 lip 2026, 16:00:47"
+  { format: 'D. MMM YYYY, HH:mm:ss', locale: 'de' },  // "2. Jul 2026, 16:00:47" (niezweryfikowane)
+];
 
 // Indeksy kolumn w activities.csv (blok szczegółowy — Moving Time + metry + m/s).
 const COL = {
@@ -31,8 +42,11 @@ const mToKm = (m) => m == null ? null : Math.round(m / 10) / 100;
 
 function parseDate(raw) {
   if (!raw) return null;
-  const d = dayjs(raw, DATE_FORMAT, true);
-  return d.isValid() ? d.format('YYYY-MM-DDTHH:mm:ss') : null;
+  for (const { format, locale } of DATE_FORMATS) {
+    const d = dayjs(raw, format, locale, true);
+    if (d.isValid()) return d.format('YYYY-MM-DDTHH:mm:ss');
+  }
+  return null;
 }
 
 function rowToActivity(row) {
@@ -68,10 +82,16 @@ function rowToActivity(row) {
   };
 }
 
-// Pierwsze 4 kolumny eksportu ze Stravy — wystarczają, żeby odróżnić właściwy
-// plik od przypadkowego innego CSV (reszta nagłówka ma duplikaty nazw kolumn,
-// patrz COL powyżej, więc nie da się prosto zweryfikować całości po nazwach).
-const REQUIRED_HEADER = ['Activity ID', 'Activity Date', 'Activity Name', 'Activity Type'];
+// Pierwsze 4 kolumny eksportu ze Stravy w obsługiwanych językach — wystarczają,
+// żeby odróżnić właściwy plik od przypadkowego innego CSV (reszta nagłówka ma
+// duplikaty nazw kolumn, patrz COL powyżej, więc nie da się prosto zweryfikować
+// całości po nazwach). PL zweryfikowane na prawdziwym eksporcie; DE to
+// best-effort zgadywanka (brak próbki) — do poprawienia, gdyby się nie zgadzało.
+const REQUIRED_HEADER_VARIANTS = [
+  ['Activity ID', 'Activity Date', 'Activity Name', 'Activity Type'],
+  ['Identyfikator aktywności', 'Data aktywności', 'Nazwa aktywności', 'Rodzaj aktywności'],
+  ['Aktivitäts-ID', 'Datum der Aktivität', 'Name der Aktivität', 'Aktivitätstyp'],
+];
 
 function readFirstLine(filePath) {
   const fd = fs.openSync(filePath, 'r');
@@ -94,11 +114,13 @@ function assertValidActivitiesCsv(filePath) {
   } catch (e) {
     throw new Error(`To nie jest poprawny plik CSV: ${e.message}`);
   }
-  const ok = header && REQUIRED_HEADER.every((name, i) => header[i] === name);
+  const ok = header && REQUIRED_HEADER_VARIANTS.some(
+    (variant) => variant.every((name, i) => header[i] === name)
+  );
   if (!ok) {
     throw new Error(
-      'To nie wygląda na eksport CSV ze Stravy (brak oczekiwanych kolumn: ' +
-      REQUIRED_HEADER.join(', ') + ').'
+      'To nie wygląda na eksport CSV ze Stravy (obsługiwane języki: PL, EN, DE; ' +
+      'brak oczekiwanych kolumn na początku pliku).'
     );
   }
 }

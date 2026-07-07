@@ -46,6 +46,7 @@ jspm_packages/
 # Personal Strava data & local state
 config.json
 activities.csv
+activities-*.csv
 db.json
 
 # Authenticated browser session (contains login cookies — never commit)
