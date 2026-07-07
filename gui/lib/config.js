@@ -21,20 +21,13 @@ const DEFAULT_CONFIG = {
   },
 };
 
-function isoDate(d) {
-  return d.toISOString().slice(0, 10);
-}
-
 function createDefaultConfig() {
-  const from = new Date();
-  const to = new Date(from);
-  to.setDate(to.getDate() + 90);
   const cfg = {
     ...DEFAULT_CONFIG,
     formUrl: '',
     displayName: '',
-    dateFrom: isoDate(from),
-    dateTo: isoDate(to),
+    dateFrom: '2026-06-22',
+    dateTo: '2026-09-21',
   };
   fs.writeFileSync(paths.config(), JSON.stringify(cfg, null, 2) + '\n');
   return cfg;
