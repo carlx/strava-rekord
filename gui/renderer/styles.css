@@ -23,6 +23,8 @@ h1 { font-size: 19px; margin: 0 0 6px; }
 .version { font-size: 12px; font-weight: 400; color: var(--muted); vertical-align: middle; }
 .dir { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .dir code { background: #8881; padding: 1px 6px; border-radius: 4px; }
+.dir-hint { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+.dir-hint code { background: #8881; padding: 1px 5px; border-radius: 4px; }
 
 .panel {
   background: var(--panel); border: 1px solid var(--border);
@@ -65,6 +67,13 @@ h1 { font-size: 19px; margin: 0 0 6px; }
 .actions .step { margin-bottom: 14px; }
 .actions .step:last-child { margin-bottom: 0; }
 .actions .step p { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+
+.subpanel {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; margin-bottom: 14px;
+}
+.subpanel > p:first-child { margin-top: 0; }
+.subpanel #list-content { margin-top: 8px; }
 .csv-help { margin: 6px 0 0; font-size: 13px; }
 .csv-help summary { cursor: pointer; color: var(--orange); font-weight: 500; }
 .csv-help ol { margin: 6px 0 0; padding-left: 18px; color: var(--muted); }

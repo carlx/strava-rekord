@@ -1,6 +1,6 @@
 const { readDb } = require('./db');
 const { loadConfig } = require('./config');
-const { isInDateRange } = require('./mapping');
+const { isInDateRange, isEligible } = require('./mapping');
 
 function listActivities() {
   const config = loadConfig();
@@ -18,7 +18,7 @@ function listActivities() {
   return {
     range: { from: config.dateFrom, to: config.dateTo },
     submitted: inRange.filter((a) => a.submitted).map(pick),
-    pending: inRange.filter((a) => !a.submitted).map(pick),
+    pending: inRange.filter((a) => !a.submitted && isEligible(a, config)).map(pick),
   };
 }
 

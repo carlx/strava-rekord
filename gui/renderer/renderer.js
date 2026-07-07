@@ -72,7 +72,7 @@ function renderMapping(s) {
   `).join('') || '<li class="empty">(brak wpisów)</li>';
   [...document.querySelectorAll('#mapping-list .map-remove')].forEach((btn) => {
     btn.onclick = async () => {
-      try { await window.api.removeTypeMapping(btn.dataset.type); await refreshStatus(); }
+      try { await window.api.removeTypeMapping(btn.dataset.type); await refreshStatus(); await renderList(); }
       catch (e) { logLine('❌ ' + e.message); }
     };
   });
@@ -101,7 +101,7 @@ let busy = false;
 // Blokuje przyciski, których kliknięcie i tak by się nie powiodło (np. wysyłkę
 // bez wcześniejszego zalogowania), z podpowiedzią w title czego brakuje.
 function applyButtonStates() {
-  for (const id of ['btn-login', 'btn-logout', 'btn-list', 'refresh', 'save-settings']) {
+  for (const id of ['btn-login', 'btn-logout', 'refresh', 'save-settings']) {
     $(id).disabled = busy;
   }
   $('btn-cancel').disabled = !busy;
@@ -147,7 +147,6 @@ function setBusy(state) {
 
 async function renderList() {
   const r = await window.api.list();
-  const panel = $('list-panel');
   const tbl = (rows) =>
     rows.length
       ? `<table><thead><tr><th>Data</th><th>Typ</th><th>Dyst.</th><th>Czas</th><th>Nazwa</th><th>Wysłano</th></tr></thead><tbody>${rows
@@ -160,9 +159,11 @@ async function renderList() {
 
   $('list-content').innerHTML =
     `<p>Zakres ${r.range.from} → ${r.range.to}</p>` +
-    `<h3>Do wysłania (${r.pending.length})</h3>${tbl(r.pending)}` +
+    `<h3>Do wysłania (${r.pending.length})</h3>` +
+    `<p class="muted">Tylko aktywności z zamapowanym typem (patrz „Mapowanie typów
+       aktywności” poniżej) — niezamapowane nie są liczone, dopóki nie dodasz mapowania.</p>` +
+    `${tbl(r.pending)}` +
     `<h3>Wysłane (${r.submitted.length})</h3>${tbl(r.submitted)}`;
-  panel.hidden = false;
 }
 
 function submitOpts(live) {
@@ -306,8 +307,7 @@ $('btn-live').onclick = () => {
   }
 };
 $('btn-cancel').onclick = () => window.api.cancel();
-$('btn-list').onclick = () => renderList().catch((e) => logLine('❌ ' + e.message));
-$('refresh').onclick = () => refreshStatus();
+$('refresh').onclick = () => { refreshStatus(); renderList().catch(() => {}); };
 $('save-settings').onclick = async () => {
   const formUrl = $('set-form-url').value.trim();
   const displayName = $('set-display-name').value.trim();
@@ -320,7 +320,7 @@ $('save-settings').onclick = async () => {
   try {
     await window.api.saveSettings({ formUrl, displayName, dateFrom, dateTo });
     await refreshStatus();
-    if (!$('list-panel').hidden) renderList().catch(() => {});
+    await renderList();
   } catch (e) { logLine('❌ ' + e.message); }
 };
 $('map-add').onclick = async () => {
@@ -331,6 +331,7 @@ $('map-add').onclick = async () => {
     await window.api.addTypeMapping({ stravaType, formOption });
     $('map-new-type').value = '';
     await refreshStatus();
+    await renderList();
   } catch (e) { logLine('❌ ' + e.message); }
 };
 $('open-dir').onclick = () => window.api.openDir();
@@ -342,9 +343,15 @@ $('clear-log').onclick = () => { logEl.textContent = ''; };
 window.api.onLog(logLine);
 window.api.onBusy(setBusy);
 window.api.onProgress((p) => { $('busy-count').textContent = ` (${p.current} z ${p.total})`; });
-window.api.onDone(() => { logLine('— gotowe —'); refreshStatus(); loadShots().catch(() => {}); });
+window.api.onDone(() => {
+  logLine('— gotowe —');
+  refreshStatus();
+  renderList().catch(() => {});
+  loadShots().catch(() => {});
+});
 window.api.onError(() => {});
 
 window.api.getVersion().then((v) => { $('app-version').textContent = 'v' + v; });
 refreshStatus().catch((e) => logLine('❌ ' + e.message));
+renderList().catch((e) => logLine('❌ ' + e.message));
 loadShots().catch((e) => logLine('❌ ' + e.message));

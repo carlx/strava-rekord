@@ -14,6 +14,14 @@
         <code id="appdir">…</code>
         <button id="open-dir" class="link">Otwórz</button>
       </div>
+      <p class="dir-hint">
+        W tym folderze appka trzyma <code>config.json</code> (ustawienia i mapowania),
+        <code>db.json</code> (lista aktywności i status wysyłki) oraz folder
+        <code>screenshots</code> (zrzuty wypełnionych formularzy). Przy aktualizacji
+        do nowej wersji skopiuj te pliki (i folder <code>.chrome-profile</code>) do
+        folderu nowej wersji, inaczej stracisz ustawienia, historię wysłanych aktywności
+        i zapisane zrzuty ekranu.
+      </p>
     </header>
 
     <div id="busy-banner" class="busy-banner" hidden>
@@ -43,21 +51,6 @@
       <p id="settings-hint" class="muted" hidden>
         Uzupełnij link do formularza i imię/nazwisko, żeby móc importować i wysyłać aktywności.
       </p>
-    </section>
-
-    <section class="panel" id="mapping-panel">
-      <div class="mapping-head">Mapowanie typów aktywności</div>
-      <p id="unmapped-hint" class="warn" hidden>
-        Niezmapowane typy: <span id="unmapped-chips"></span>
-        — kliknij typ, żeby go szybko dodać poniżej.
-      </p>
-      <ul id="mapping-list"><!-- wypełniane z JS --></ul>
-      <div class="mapping-add-row">
-        <input id="map-new-type" type="text" list="known-types" placeholder="typ ze Stravy, np. TrailRun" />
-        <datalist id="known-types"></datalist>
-        <select id="map-new-target"><!-- wypełniane z JS --></select>
-        <button id="map-add" class="secondary">Dodaj</button>
-      </div>
     </section>
 
     <section class="panel" id="status-panel">
@@ -92,11 +85,26 @@
         </details>
       </div>
 
-      <div class="step">
-        <button id="btn-list" class="secondary">Pokaż listę aktywności</button>
-        <p>Pokazuje, które aktywności z wybranego zakresu dat już wysłałeś,
-           a które jeszcze czekają na wysłanie — warto sprawdzić przed
-           wysyłką.</p>
+      <div class="subpanel" id="list-subpanel">
+        <p class="muted">Lista poniżej pokazuje, które aktywności z wybranego
+           zakresu dat już wysłałeś, a które jeszcze czekają na wysłanie —
+           warto sprawdzić przed wysyłką.</p>
+        <div id="list-content"></div>
+      </div>
+
+      <div class="subpanel" id="mapping-panel">
+        <div class="mapping-head">Mapowanie typów aktywności</div>
+        <p id="unmapped-hint" class="warn" hidden>
+          Niezmapowane typy: <span id="unmapped-chips"></span>
+          — kliknij typ, żeby go szybko dodać poniżej.
+        </p>
+        <ul id="mapping-list"><!-- wypełniane z JS --></ul>
+        <div class="mapping-add-row">
+          <input id="map-new-type" type="text" list="known-types" placeholder="typ ze Stravy, np. TrailRun" />
+          <datalist id="known-types"></datalist>
+          <select id="map-new-target"><!-- wypełniane z JS --></select>
+          <button id="map-add" class="secondary">Dodaj</button>
+        </div>
       </div>
 
       <div class="step submit-step">
@@ -117,10 +125,6 @@
            robi to samo i na końcu naprawdę klika „Prześlij” w formularzu —
            tego nie da się cofnąć.</p>
       </div>
-    </section>
-
-    <section class="panel" id="list-panel" hidden>
-      <div id="list-content"></div>
     </section>
 
     <section class="panel" id="shots-panel">
