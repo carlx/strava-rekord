@@ -4,6 +4,10 @@ Graficzna nakładka na skrypty z `../src`. Robi to samo (import CSV → logowani
 dry-run → wysyłka → lista), tylko w okienku, i daje się spakować do
 samodzielnej binarki: **Windows `.zip`**, **Linux `AppImage`**, **macOS `.dmg`**.
 
+> Szukasz instrukcji obsługi appki krok po kroku (bez wiedzy technicznej)?
+> Zobacz [`PRZEWODNIK.md`](PRZEWODNIK.md). Ten plik (`README.md`) jest dla
+> osób budujących appkę ze źródeł.
+
 ## Jak to działa pod spodem
 
 - **GUI:** Electron (jego Chromium = interfejs).
