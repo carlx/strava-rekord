@@ -111,14 +111,15 @@ function applyButtonStates() {
   const hasSession = !!s.hasProfile;
   const hasActivities = !!(s.counts && s.counts.total > 0);
 
-  const setGate = (id, blocked, reason) => {
+  const setGate = (id, blocked, reason, defaultTitle = '') => {
     const el = $(id);
     el.disabled = busy || blocked;
-    el.title = (!busy && blocked) ? reason : '';
+    el.title = (!busy && blocked) ? reason : defaultTitle;
   };
 
   setGate('btn-choose-csv', needsSetup,
-    'Najpierw uzupełnij Ustawienia (link do formularza i imię/nazwisko).');
+    'Najpierw uzupełnij Ustawienia (link do formularza i imię/nazwisko).',
+    'Wybierz plik activities.csv pobrany ze Stravy (eksport CSV)');
   setGate('btn-import', needsSetup || !s.hasCsv,
     needsSetup
       ? 'Najpierw uzupełnij Ustawienia (link do formularza i imię/nazwisko).'
